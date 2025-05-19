@@ -20,7 +20,6 @@ def get_followers_data(link):
     
     response = requests.get(url, headers=headers, params=querystring)
     data = response.json()
-    print(data)
     # Extract id and name from each user in the response
     users_data = []
     for user in data:
@@ -34,6 +33,13 @@ def get_followers_data(link):
     
     # Create DataFrame
     df = pd.DataFrame(users_data)
+    return df
+
+def add_twitter_links(df):
+    """
+    Add Twitter profile links to the dataframe
+    """
+    df['link'] = df['id'].apply(lambda x: f"https://x.com/i/user/{x}")
     return df
 
 def find_common_follows(links):
@@ -179,6 +185,10 @@ def compare_with_previous(common_follows_df, new_tracking_df):
                 print(f"\nAccount: {row['name']} (ID: {row['id']})")
                 print(f"Followed by: {row['followed_by']}")
                 print(f"Number of followers: {row['followers_count']}")
+    
+    # Add Twitter links to both dataframes
+    common_follows_df = add_twitter_links(common_follows_df)
+    new_tracking_df = add_twitter_links(new_tracking_df)
     
     # Combine common_follows and new_tracking dataframes
     all_accounts_df = pd.concat([common_follows_df, new_tracking_df], ignore_index=True)
