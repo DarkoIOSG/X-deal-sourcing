@@ -100,20 +100,22 @@ def get_last_tweet_date(user_id: str) -> str:
         print(f"Error fetching last tweet date: {e}")
         return None
 
-def summarize_account_tweets(user_id: str) -> str:
+def summarize_account_tweets(user_id: str) -> tuple[str, list]:
     """
-    Extract and list specific entities (projects, tokens, VCs, etc.) mentioned in the user's tweets.
+    Analyze user's tweets to provide a description of their interests and extract mentioned entities.
     
     Args:
         user_id (str): The X user ID to analyze tweets from
     
     Returns:
-        str: A list of entities mentioned in the tweets, one per line
+        tuple: A tuple containing:
+            - str: Description of user's interests based on their tweets
+            - list: List of dictionaries containing mentioned entities with their types
     """
     # Get the tweets
     tweets = get_user_tweets(user_id)
     if not tweets:
-        return "No tweets found to analyze."
+        return "No tweets found to analyze.", []
     
     # Combine tweets into a single text
     tweets_text = "\n".join(tweets)
@@ -123,36 +125,59 @@ def summarize_account_tweets(user_id: str) -> str:
     
     try:
         # Create the prompt for the LLM
-        prompt = f"""Extract all specific entities mentioned in these tweets. Return them as a simple list, one entity per line.
-Include the entity type in parentheses after each name.
+        prompt = f"""Analyze these tweets and provide:
+1. A brief description of the user's main interests and focus areas
+2. A list of specific entities mentioned (projects, tokens, VCs, companies, people)
 
-Example format:
-ProjectA (project)
-TOKEN1 (token)
-VC1 (investor)
-Company1 (company)
-Person1 (person)
+Format the response as:
+DESCRIPTION:
+[Your analysis of user's interests]
+
+ENTITIES:
+- Entity1 (type)
+- Entity2 (type)
+- Entity3 (type)
 
 Tweets to analyze:
-{tweets_text}
-
-List the entities (one per line):"""
+{tweets_text}"""
         
         # Call OpenAI API
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are an entity extraction specialist. Return a simple list of entities, one per line, with their type in parentheses. Be precise and avoid general terms."},
+                {"role": "system", "content": "You are an expert at analyzing social media content and extracting meaningful insights about user interests and mentioned entities."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=150,
-            temperature=0.8
+            max_tokens=300,
+            temperature=0.7
         )
         
-        return response.choices[0].message.content.strip()
+        # Parse the response
+        content = response.choices[0].message.content.strip()
+        
+        # Split the response into description and entities
+        parts = content.split("ENTITIES:")
+        description = parts[0].replace("DESCRIPTION:", "").strip()
+        
+        # Extract entities into a list of dictionaries
+        mentioned_entities = []
+        if len(parts) > 1:
+            entities_text = parts[1].strip()
+            for line in entities_text.split("\n"):
+                if line.strip().startswith("-"):
+                    entity_parts = line.strip("- ").split("(")
+                    if len(entity_parts) == 2:
+                        name = entity_parts[0].strip()
+                        entity_type = entity_parts[1].strip(")")
+                        mentioned_entities.append({
+                            "name": name,
+                            "type": entity_type
+                        })
+        
+        return description, mentioned_entities
         
     except Exception as e:
-        return f"Error generating summary: {str(e)}"
+        return f"Error generating summary: {str(e)}", []
 
 # Example usage
 if __name__ == "__main__":
@@ -161,5 +186,10 @@ if __name__ == "__main__":
     print(get_user_tweets(user_id))
     print("\nLast tweet date:")
     print(get_last_tweet_date(user_id))
-    print("\nAccount summary:")
-    print(summarize_account_tweets(user_id))
+    print("\nAccount analysis:")
+    description, entities = summarize_account_tweets(user_id)
+    print("\nDescription:")
+    print(description)
+    print("\nMentioned Entities:")
+    for entity in entities:
+        print(f"- {entity['name']} ({entity['type']})")
