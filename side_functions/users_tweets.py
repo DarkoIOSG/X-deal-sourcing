@@ -5,6 +5,8 @@ from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
 from openai import OpenAI
+from tqdm import tqdm  # progress bar
+import time
 
 API_KEY = os.getenv("TweetScout_API_key")
 OPENAI_API_KEY = os.getenv("OPENAI_API_key")
@@ -179,17 +181,34 @@ Tweets to analyze:
     except Exception as e:
         return f"Error generating summary: {str(e)}", []
 
+# Load your CSV file
+df = pd.read_csv("cleaned_tracking_following.csv")
+
+# Make sure there is an 'id' column
+if "id" not in df.columns:
+    raise ValueError("The CSV file must contain an 'id' column.")
+
+# Add a new column to store the last tweet date
+df["last_tweet_date"] = None
+
+# Loop through each user ID and get the last tweet date
+for idx, user_id in tqdm(enumerate(df["id"]), total=len(df)):
+    try:
+        date = get_last_tweet_date(str(user_id))
+        df.at[idx, "last_tweet_date"] = date
+        time.sleep(0.5)  # Respectful delay to avoid rate limiting
+    except Exception as e:
+        print(f"Error processing ID {user_id}: {e}")
+        df.at[idx, "last_tweet_date"] = None
+
+# Save the updated CSV
+df.to_csv("cleaned_tracking_following_with_dates.csv", index=False)
+print("Finished. Output saved as 'cleaned_tracking_following_with_dates.csv'")
+
 # Example usage
-if __name__ == "__main__":
-    user_id = "1395628622417825795"
-    print("Last 20 tweets:")
-    print(get_user_tweets(user_id))
-    print("\nLast tweet date:")
-    print(get_last_tweet_date(user_id))
-    print("\nAccount analysis:")
-    description, entities = summarize_account_tweets(user_id)
-    print("\nDescription:")
-    print(description)
-    print("\nMentioned Entities:")
-    for entity in entities:
-        print(f"- {entity['name']} ({entity['type']})")
+#if __name__ == "__main__":
+    #user_id = "1395628622417825795"
+    #print("Last 20 tweets:")
+    #print(get_user_tweets(user_id))
+    #print("\nLast tweet date:")
+    #print(get_last_tweet_date(user_id))
