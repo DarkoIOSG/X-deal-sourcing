@@ -47,6 +47,6 @@ def process_users_tweets_analysis(file_path: str, output_path: str):
     df.to_csv(output_path, index=False)
 
 process_users_tweets_analysis(
-    file_path="merged_tracking_following_2025-06-03_with_analysis.csv",
+    file_path="merged_tracking_following_2025-06-26_with_analysis.csv",
     output_path="cleaned_tracking_following.csv"
 )

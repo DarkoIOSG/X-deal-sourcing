@@ -73,7 +73,7 @@ def merge_and_check_following():
     print(f"Total records after merging: {len(merged_df)}")
     
     # Convert register_date to datetime
-    merged_df['register_date'] = pd.to_datetime(merged_df['register_date'])
+    merged_df['register_date'] = pd.to_datetime(merged_df['register_date'], format='%a %b %d %H:%M:%S %z %Y')
     
     # Group by id and get the latest record for each account
     latest_records = merged_df.sort_values('register_date').groupby('id').last().reset_index()

@@ -102,22 +102,20 @@ def get_last_tweet_date(user_id: str) -> str:
         print(f"Error fetching last tweet date: {e}")
         return None
 
-def summarize_account_tweets(user_id: str) -> tuple[str, list]:
+def summarize_account_tweets(user_id: str) -> str:
     """
-    Analyze user's tweets to provide a description of their interests and extract mentioned entities.
+    Analyze user's tweets to classify the account as either a "project" or "individual".
     
     Args:
         user_id (str): The X user ID to analyze tweets from
     
     Returns:
-        tuple: A tuple containing:
-            - str: Description of user's interests based on their tweets
-            - list: List of dictionaries containing mentioned entities with their types
+        str: Classification of the account as either "project" or "individual"
     """
     # Get the tweets
     tweets = get_user_tweets(user_id)
     if not tweets:
-        return "No tweets found to analyze.", []
+        return "unknown"
     
     # Combine tweets into a single text
     tweets_text = "\n".join(tweets)
@@ -127,18 +125,12 @@ def summarize_account_tweets(user_id: str) -> tuple[str, list]:
     
     try:
         # Create the prompt for the LLM
-        prompt = f"""Analyze these tweets and provide:
-1. A brief description of the user's main interests and focus areas
-2. A list of specific entities mentioned (projects, tokens, VCs, companies, people)
+        prompt = f"""Analyze these tweets and determine if this account represents a project/organization or an individual person.
+Consider these factors:
+- Project accounts typically discuss company updates, product launches, technical details, and have formal communication
+- Individual accounts typically share personal opinions, experiences, and have more casual communication
 
-Format the response as:
-DESCRIPTION:
-[Your analysis of user's interests]
-
-ENTITIES:
-- Entity1 (type)
-- Entity2 (type)
-- Entity3 (type)
+Classify the account as either "project" or "individual".
 
 Tweets to analyze:
 {tweets_text}"""
@@ -147,60 +139,48 @@ Tweets to analyze:
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are an expert at analyzing social media content and extracting meaningful insights about user interests and mentioned entities."},
+                {"role": "system", "content": "You are an expert at analyzing social media accounts and determining if they represent projects/organizations or individuals."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=300,
-            temperature=0.7
+            max_tokens=50,
+            temperature=0.5
         )
         
-        # Parse the response
-        content = response.choices[0].message.content.strip()
+        # Parse the response and ensure it's one of the two categories
+        classification = response.choices[0].message.content.strip().lower()
         
-        # Split the response into description and entities
-        parts = content.split("ENTITIES:")
-        description = parts[0].replace("DESCRIPTION:", "").strip()
-        
-        # Extract entities into a list of dictionaries
-        mentioned_entities = []
-        if len(parts) > 1:
-            entities_text = parts[1].strip()
-            for line in entities_text.split("\n"):
-                if line.strip().startswith("-"):
-                    entity_parts = line.strip("- ").split("(")
-                    if len(entity_parts) == 2:
-                        name = entity_parts[0].strip()
-                        entity_type = entity_parts[1].strip(")")
-                        mentioned_entities.append({
-                            "name": name,
-                            "type": entity_type
-                        })
-        
-        return description, mentioned_entities
+        # Normalize the response to ensure it's either "project" or "individual"
+        if "project" in classification:
+            return "project"
+        elif "individual" in classification:
+            return "individual"
+        else:
+            return "unknown"
         
     except Exception as e:
-        return f"Error generating summary: {str(e)}", []
+        print(f"Error classifying account: {str(e)}")
+        return "unknown"
 
 # Load your CSV file
-df = pd.read_csv("cleaned_tracking_following.csv")
+df = pd.read_csv("cleaned_tracking_following_with_dates_2025-06-26.csv")
 
 # Make sure there is an 'id' column
 if "id" not in df.columns:
     raise ValueError("The CSV file must contain an 'id' column.")
 
-# Add a new column to store the last tweet date
-df["last_tweet_date"] = None
+# Add a new column to store the classification
+df["account_type"] = None
 
-# Loop through each user ID and get the last tweet date
+# Loop through each user ID and get the classification
 for idx, user_id in tqdm(enumerate(df["id"]), total=len(df)):
     try:
-        date = get_last_tweet_date(str(user_id))
-        df.at[idx, "last_tweet_date"] = date
+        classification = summarize_account_tweets(str(user_id))
+        df.at[idx, "account_type"] = classification
         time.sleep(0.5)  # Respectful delay to avoid rate limiting
     except Exception as e:
         print(f"Error processing ID {user_id}: {e}")
-        df.at[idx, "last_tweet_date"] = None
+        df.at[idx, "account_type"] = "unknown"
 
 # Save the updated CSV
-df.to_csv("cleaned_tracking_following_with_dates.csv", index=False)
-print("Finished. Output saved as 'cleaned_tracking_following_with_dates.csv'")
+df.to_csv("cleaned_tracking_following_with_dates_2025-06-26_enriched.csv", index=False)
+print("Finished. Output saved as 'cleaned_tracking_following_with_dates_2025-06-26_enriched_with_account_type.csv'")
