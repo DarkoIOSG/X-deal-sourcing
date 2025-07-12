@@ -156,4 +156,4 @@ def merge_and_check_following():
     print(f"Found {len(result_df)} accounts that are followed by at least one account from followed_accounts.txt")
 
 if __name__ == "__main__":
-    merge_and_check_following() 
+    merge_and_check_following()

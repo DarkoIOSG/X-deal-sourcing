@@ -36,4 +36,4 @@ def get_followers_data(link):
     df = pd.DataFrame(users_data)
     return df
 
-print(get_followers_data('https://x.com/DarkoB1995'))
+#print(get_followers_data('https://x.com/DarkoB1995'))

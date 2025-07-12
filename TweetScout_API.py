@@ -132,31 +132,31 @@ def compare_with_previous(common_follows_df, new_tracking_df):
         # Find new accounts (those not in previous results)
         new_accounts = common_follows_df[~common_follows_df['id'].isin(previous_df['id'])]
         
-        if not new_accounts.empty:
-            token = TG_bot_token
-            msg_type = 'sendMessage'
-            chat_id = '-4652016922'
-            for _, row in new_accounts.iterrows():
-                text = f'\nNew common follows found (not in previous results):\nAccount: {row["name"]} (ID: {row["id"]})\nFollowed by: {row["followed_by"]}\nNumber of followers: {row["followers_count"]}'
-                msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
-                telegram_msg = requests.get(msg)
-        else:
-            print("\nNo new common follows found.")
+        #if not new_accounts.empty:
+            #token = TG_bot_token
+            #msg_type = 'sendMessage'
+            #chat_id = '-4652016922'
+            #for _, row in new_accounts.iterrows():
+               #text = f'\nNew common follows found (not in previous results):\nAccount: {row["name"]} (ID: {row["id"]})\nFollowed by: {row["followed_by"]}\nNumber of followers: {row["followers_count"]}'
+                #msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
+                #telegram_msg = requests.get(msg)
+        #else:
+            #print("\nNo new common follows found.")
     else:
-        token = TG_bot_token
-        msg_type = 'sendMessage'
-        chat_id = '-4652016922'
-        text = f'\nNo previous data found. This is the first run'
-        msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
-        telegram_msg = requests.get(msg)
+        #token = TG_bot_token
+        #msg_type = 'sendMessage'
+        #chat_id = '-4652016922'
+        #text = f'\nNo previous data found. This is the first run'
+        #msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
+        #telegram_msg = requests.get(msg)
         print("\nNo previous data found. This is the first run.")
         # For first run, show all common follows
-        if not common_follows_df.empty:
-            print("\nCommon follows found (first run) - at least 20% of users follow these accounts:")
-            for _, row in common_follows_df.iterrows():
-                text = f'\nAccount: {row["name"]} (ID: {row["id"]})\nFollowed by: {row["followed_by"]}\nNumber of followers: {row["followers_count"]}'
-                msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
-                telegram_msg = requests.get(msg)
+        #if not common_follows_df.empty:
+            #print("\nCommon follows found (first run) - at least 20% of users follow these accounts:")
+            #for _, row in common_follows_df.iterrows():
+                #text = f'\nAccount: {row["name"]} (ID: {row["id"]})\nFollowed by: {row["followed_by"]}\nNumber of followers: {row["followers_count"]}'
+                #msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
+                #telegram_msg = requests.get(msg)
     
     # Handle new tracking accounts
     if new_tracking_file.exists():
@@ -167,24 +167,24 @@ def compare_with_previous(common_follows_df, new_tracking_df):
         new_tracking_df = new_tracking_df.dropna(subset=['id', 'name'])
         
         # Find new accounts that weren't being tracked before
-        new_tracking_accounts = new_tracking_df[~new_tracking_df['id'].isin(previous_tracking_df['id'])]
+        #new_tracking_accounts = new_tracking_df[~new_tracking_df['id'].isin(previous_tracking_df['id'])]
         
-        if not new_tracking_accounts.empty:
-            token = TG_bot_token
-            msg_type = 'sendMessage'
-            chat_id = '-4652016922'
-            for _, row in new_tracking_accounts.iterrows():
-                text = f'\nNew account to track (20%+ followers):\nAccount: {row["name"]} (ID: {row["id"]})\nFollowed by: {row["followed_by"]}\nNumber of followers: {row["followers_count"]}'
-                msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
-                telegram_msg = requests.get(msg)
+        #if not new_tracking_accounts.empty:
+            #token = TG_bot_token
+            #msg_type = 'sendMessage'
+            #chat_id = '-4652016922'
+            #for _, row in new_tracking_accounts.iterrows():
+                #text = f'\nNew account to track (20%+ followers):\nAccount: {row["name"]} (ID: {row["id"]})\nFollowed by: {row["followed_by"]}\nNumber of followers: {row["followers_count"]}'
+                #msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
+                #telegram_msg = requests.get(msg)
     else:
         print("\nNo previous tracking data found. This is the first run for tracking accounts.")
-        if not new_tracking_df.empty:
-            print("\nNew accounts to track (20%+ followers):")
-            for _, row in new_tracking_df.iterrows():
-                print(f"\nAccount: {row['name']} (ID: {row['id']})")
-                print(f"Followed by: {row['followed_by']}")
-                print(f"Number of followers: {row['followers_count']}")
+        #if not new_tracking_df.empty:
+            #print("\nNew accounts to track (20%+ followers):")
+            #for _, row in new_tracking_df.iterrows():
+                #print(f"\nAccount: {row['name']} (ID: {row['id']})")
+                #print(f"Followed by: {row['followed_by']}")
+                #print(f"Number of followers: {row['followers_count']}")
     
     # Add Twitter links to both dataframes
     common_follows_df = add_twitter_links(common_follows_df)
