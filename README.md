@@ -4,7 +4,7 @@ A Python application that analyzes Twitter/X user relationships to identify comm
 
 ## Overview
 
-This application helps identify accounts that are commonly followed by a curated list of users, which can be useful for deal sourcing and network analysis. It tracks accounts that are followed by at least 20% of the monitored users and provides notifications through Telegram. At the end there is Notion Dahsboard that shows list of all common follows accounts ordered by number of accounts from our watchlist follow them.
+This application helps identify accounts that are commonly followed by a curated list of users, which can be useful for deal sourcing and network analysis. It tracks accounts that are followed by at least 20% of the monitored users and provides notifications through Telegram. At the end there is Notion Dahsboard that shows list of all common follows accounts ordered by number of accounts from our watchlist follow them. The list is updated on weekly basis.
 
 ## Features
 
