@@ -81,7 +81,7 @@ def enrich_users_with_twitter_info(input_csv_path, output_csv_path=None):
 
 if __name__ == "__main__":
     # Input file path
-    input_file = "cleaned_tracking_following_with_dates_2025-06-26_enriched.csv"
+    input_file = "cleaned_tracking_following_with_dates_2025-11-09_enriched.csv"
     
     # Run the enrichment process
     print(f"Starting enrichment process for {input_file}")
