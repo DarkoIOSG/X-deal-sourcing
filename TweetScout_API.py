@@ -6,7 +6,8 @@ from datetime import datetime
 from collections import defaultdict
 
 API_KEY = os.getenv("TweetScout_API_key")
-TG_bot_token = os.getenv("TG_bot_token")
+#TG_bot_token = os.getenv("TG_bot_token")
+TG_bot_token = 'alkflksajfsaj'
 
 def get_followers_data(link):
     url = "https://api.tweetscout.io/v2/follows"
@@ -138,7 +139,7 @@ def compare_with_previous(common_follows_df, new_tracking_df):
             chat_id = '-4652016922'
             for _, row in new_accounts.iterrows():
                 text = f'\nNew common follows found (not in previous results):\nAccount: {row["name"]} (ID: {row["id"]})\nFollowed by: {row["followed_by"]}\nNumber of followers: {row["followers_count"]}'
-                msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
+                #msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
                 telegram_msg = requests.get(msg)
         else:
             print("\nNo new common follows found.")
@@ -147,7 +148,7 @@ def compare_with_previous(common_follows_df, new_tracking_df):
         msg_type = 'sendMessage'
         chat_id = '-4652016922'
         text = f'\nNo previous data found. This is the first run'
-        msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
+        #msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
         telegram_msg = requests.get(msg)
         print("\nNo previous data found. This is the first run.")
         # For first run, show all common follows
@@ -155,7 +156,7 @@ def compare_with_previous(common_follows_df, new_tracking_df):
             print("\nCommon follows found (first run) - at least 20% of users follow these accounts:")
             for _, row in common_follows_df.iterrows():
                 text = f'\nAccount: {row["name"]} (ID: {row["id"]})\nFollowed by: {row["followed_by"]}\nNumber of followers: {row["followers_count"]}'
-                msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
+                #msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
                 telegram_msg = requests.get(msg)
     
     # Handle new tracking accounts
@@ -175,7 +176,7 @@ def compare_with_previous(common_follows_df, new_tracking_df):
             chat_id = '-4652016922'
             for _, row in new_tracking_accounts.iterrows():
                 text = f'\nNew account to track (20%+ followers):\nAccount: {row["name"]} (ID: {row["id"]})\nFollowed by: {row["followed_by"]}\nNumber of followers: {row["followers_count"]}'
-                msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
+                #msg = f'https://api.telegram.org/bot{token}/{msg_type}?chat_id={chat_id}&text={text}'
                 telegram_msg = requests.get(msg)
     else:
         print("\nNo previous tracking data found. This is the first run for tracking accounts.")

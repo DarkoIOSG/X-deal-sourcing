@@ -162,7 +162,7 @@ Tweets to analyze:
         return "unknown"
 
 # Load your CSV file
-df = pd.read_csv("cleaned_tracking_following_with_dates_2025-06-26.csv")
+df = pd.read_csv("cleaned_tracking_following_with_dates_2025_11_09.csv")
 
 # Make sure there is an 'id' column
 if "id" not in df.columns:
@@ -182,5 +182,5 @@ for idx, user_id in tqdm(enumerate(df["id"]), total=len(df)):
         df.at[idx, "account_type"] = "unknown"
 
 # Save the updated CSV
-df.to_csv("cleaned_tracking_following_with_dates_2025-06-26_enriched.csv", index=False)
-print("Finished. Output saved as 'cleaned_tracking_following_with_dates_2025-06-26_enriched_with_account_type.csv'")
+df.to_csv("cleaned_tracking_following_with_dates_2025-11-09_enriched.csv", index=False)
+print("Finished. Output saved as 'cleaned_tracking_following_with_dates_2025-11-09_enriched_with_account_type.csv'")
