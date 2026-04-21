@@ -1,76 +1,124 @@
-# X-deal-sourcing
+# X Deal Sourcing
 
-A Python application that analyzes Twitter/X user relationships to identify common follows and potential deal sources using the TweetScout API.
+A deal-sourcing pipeline that identifies influential figures and emerging projects in the startup and crypto ecosystem by monitoring who accounts on a curated watchlist are newly following on X (Twitter).
 
-## Overview
+## How It Works
 
-This application helps identify accounts that are commonly followed by a curated list of users, which can be useful for deal sourcing and network analysis. It tracks accounts that are followed by at least 20% of the monitored users and provides notifications through Telegram. At the end there is Notion Dahsboard that shows list of all common follows accounts ordered by number of accounts from our watchlist follow them. The list is updated on weekly basis.
+Each weekly run:
+1. Fetches accounts that each watchlist member started following in the last 7 days (via Sorsa API)
+2. Aggregates results — surfaces accounts followed by the most watchlist members
+3. Enriches each new account with full profile data and their last 20 tweets
+4. Analyzes tweets with AI (Groq / LLaMA) to generate a description, extract mentioned entities, and classify the account as `project` or `person`
+5. Syncs all new accounts to a Notion dashboard
+6. Sends a Telegram digest of newly discovered projects (created within the last 2 years), sorted by watchlist follower count
 
-## Features
+## Notion Dashboard
 
-- Fetches follower data for a list of Twitter/X accounts
-- Identifies accounts followed by at least 20% of monitored users
-- Tracks new accounts that meet the threshold
-- Sends notifications via Telegram for new discoveries
-- Maintains historical data in CSV files
-- Compares results with previous runs to identify new common follows
+Each account entry includes:
+- Name + X profile link
+- Account ID and username
+- Account creation date
+- Watcher count + list of watchlist accounts that follow them
+- Official bio
+- AI-generated description based on last 20 tweets
+- Mentioned entities (projects, tokens, VCs, people)
+- Followers count, friends count, tweets count
+- Last tweet date
+- Verified status
+- Account type (project / person)
 
-## Prerequisites
+## Setup
 
-- Python 3.x
-- TweetScout API key
-- Telegram Bot Token
+### Prerequisites
+- Python 3.10+
+- [Sorsa API](https://sorsa.io) key
+- [Groq](https://console.groq.com) API key (free tier)
+- Notion integration token + database
+- Telegram bot token + group chat ID
 
-## Environment Variables
+### Installation
 
-Create a `.env` file in the project root with the following variables:
-
-```
-TweetScout_API_key=your_api_key_here
-TG_bot_token=your_telegram_bot_token_here
-```
-
-## Installation
-
-1. Clone the repository:
 ```bash
 git clone https://github.com/DarkoIOSG/X-deal-sourcing.git
 cd X-deal-sourcing
-```
-
-2. Install required packages:
-```bash
 pip install -r requirements.txt
 ```
 
-## Usage
+### Configuration
 
-Run the script:
-```bash
-python TweetScout_API.py
+Copy `.env.example` to `.env` and fill in your credentials:
+
+```
+TweetScout_API_key=your_sorsa_api_key
+OPENAI_API_key=your_openai_api_key
+GROQ_API_KEY=your_groq_api_key
+NOTION_TOKEN=your_notion_integration_token
+NOTION_DATABASE_ID=your_notion_database_id
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+TELEGRAM_CHAT_ID=your_telegram_group_chat_id
 ```
 
-The script will:
-1. Fetch follower data for all configured accounts
-2. Identify common follows (accounts followed by ≥20% of users)
-3. Compare with previous results
-4. Send notifications via Telegram for new discoveries
-5. Save results to CSV files:
-   - `common_follows.csv`: All tracked accounts
-   - `new_tracking_{date}.csv`: New accounts to track
+### Watchlist
 
-## Output Files
+Add X profile URLs (one per line) to `followed_accounts.txt`:
 
-- `common_follows.csv`: Contains all tracked accounts with their details
-- `new_tracking_{date}.csv`: Contains new accounts that meet the tracking threshold
+```
+https://x.com/username1
+https://x.com/username2
+```
 
-## Telegram Notifications
+### Notion Database
 
-The script sends notifications to a configured Telegram channel for:
-- New common follows discovered
-- New accounts that meet the tracking threshold
-- First run notifications
+Create a Notion database with these properties:
 
-## Contributing
+| Property | Type |
+|---|---|
+| Name | Title |
+| X Profile | URL |
+| Account ID | Text |
+| Username | Text |
+| Account Created | Date |
+| Watcher Count | Number |
+| Watchers | Text |
+| Official Bio | Text |
+| Tweet Analysis | Text |
+| Entities | Text |
+| Followers Count | Number |
+| Friends Count | Number |
+| Tweets Count | Number |
+| Last Tweet Date | Date |
+| Verified | Checkbox |
+| Account Type | Select (project / person / unknown) |
 
-Feel free to submit issues and enhancement requests.
+Connect the Notion integration to the database via **Settings → Connections**.
+
+## Usage
+
+```bash
+python3 run.py
+```
+
+State is stored in `state.db` (SQLite). Accounts already synced to Notion are skipped on subsequent runs — only new discoveries are processed each week.
+
+To reset and reprocess everything:
+```bash
+rm state.db
+```
+
+## Project Structure
+
+```
+run.py                    # entry point
+config.py                 # environment variables and constants
+state.py                  # SQLite state management
+api/
+  sorsa.py                # Sorsa API v3 client
+  notion.py               # Notion API client
+pipeline/
+  fetch_following.py      # fetch new follows (7d) for each watchlist account
+  aggregate.py            # find accounts followed by multiple watchlist members
+  enrich.py               # enrich profiles and fetch tweets
+  analyze.py              # AI tweet analysis via Groq
+  notion_sync.py          # sync new accounts to Notion
+  telegram_notify.py      # send Telegram digest of new projects
+```
