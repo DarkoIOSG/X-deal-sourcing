@@ -5,6 +5,7 @@ from pipeline.aggregate import aggregate
 from pipeline.enrich import enrich_profiles, enrich_tweets
 from pipeline.analyze import analyze_accounts
 from pipeline.notion_sync import sync_to_notion
+from pipeline.telegram_notify import notify_new_projects
 
 
 def main():
@@ -18,7 +19,7 @@ def main():
     following_map = fetch_all_following(watchlist)
 
     new_accounts, existing_accounts = aggregate(following_map)
-    print(f"\nFound {len(new_accounts)} new accounts (≥20% threshold)")
+    print(f"\nFound {len(new_accounts)} new accounts")
     print(f"Skipping {len(existing_accounts)} already known accounts\n")
 
     if not new_accounts:
@@ -32,11 +33,14 @@ def main():
     print("Fetching tweets...")
     new_accounts = enrich_tweets(new_accounts)
 
-    print("Analyzing tweets with OpenAI...")
+    print("Analyzing tweets...")
     new_accounts = analyze_accounts(new_accounts)
 
     print("Syncing to Notion...")
     sync_to_notion(new_accounts)
+
+    print("Sending Telegram notifications...")
+    notify_new_projects(new_accounts)
 
     log_run(len(watchlist), len(new_accounts))
     print(f"\nDone. {len(new_accounts)} new accounts added to Notion.")
