@@ -1,19 +1,17 @@
-import time
-import re
-from groq import Groq
+import anthropic
 from tqdm import tqdm
-from config import GROQ_API_KEY
+from config import ANTHROPIC_API_KEY
 
 _client = None
 
-# ~3500 tokens of tweet content keeps total request well under Groq's 6000 TPM limit
+# ~3500 tokens of tweet content keeps total request well under context limits
 _MAX_TWEET_CHARS = 12000
 
 
 def _get_client():
     global _client
     if _client is None:
-        _client = Groq(api_key=GROQ_API_KEY)
+        _client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     return _client
 
 
@@ -46,30 +44,14 @@ Rules:
 Tweets:
 {tweets_text}"""
 
-    for attempt in range(3):
-        try:
-            response = _get_client().chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=[
-                    {"role": "system", "content": "You analyze crypto and startup Twitter accounts for a venture capital deal-sourcing tool."},
-                    {"role": "user", "content": prompt},
-                ],
-                max_tokens=400,
-                temperature=0.3,
-            )
-            break
-        except Exception as e:
-            err = str(e)
-            if "429" in err:
-                # parse "Please try again in Xm Ys" from the error message
-                m = re.search(r"try again in (\d+)m([\d.]+)s", err)
-                wait = int(m.group(1)) * 60 + float(m.group(2)) + 5 if m else 60
-                if attempt < 2:
-                    time.sleep(wait)
-                    continue
-            raise
+    response = _get_client().messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=400,
+        system="You analyze crypto and startup Twitter accounts for a venture capital deal-sourcing tool.",
+        messages=[{"role": "user", "content": prompt}],
+    )
 
-    content = response.choices[0].message.content.strip()
+    content = response.content[0].text.strip()
 
     account_type = "unknown"
     if "TYPE:" in content:
