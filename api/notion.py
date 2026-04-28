@@ -29,6 +29,14 @@ def _url(value: str) -> dict:
     return {"url": str(value) if value else None}
 
 
+def _select(value: str) -> dict:
+    return {"select": {"name": value} if value else None}
+
+
+def _multi_select(values: list[str]) -> dict:
+    return {"multi_select": [{"name": v} for v in values if v]}
+
+
 def _parse_date(value: str) -> str | None:
     if not value:
         return None
@@ -66,7 +74,11 @@ def create_page(account: dict) -> str:
         "Tweets Count": _number(account.get("tweets_count")),
         "Last Tweet Date": _date(account.get("last_tweet_date", "")),
         "Verified": _checkbox(account.get("verified", False)),
-        "Account Type": {"select": {"name": account.get("account_type", "unknown")}},
+        "Account Type": _select(account.get("account_type", "unknown")),
+        "One-liner": _text(account.get("one_liner", "")),
+        "Sector": _multi_select(account.get("sector", [])),
+        "Token Status": _select(account.get("token_status", "unknown")),
+        "Stage": _select(account.get("stage", "unknown")),
     }
 
     payload = {
@@ -79,3 +91,23 @@ def create_page(account: dict) -> str:
         print(f"\n  [notion error] {r.status_code}: {r.text}")
     r.raise_for_status()
     return r.json()["id"]
+
+
+def update_page(page_id: str, account: dict):
+    properties = {
+        "Account Type": _select(account.get("account_type", "unknown")),
+        "Tweet Analysis": _text(account.get("description", "")),
+        "One-liner": _text(account.get("one_liner", "")),
+        "Sector": _multi_select(account.get("sector", [])),
+        "Token Status": _select(account.get("token_status", "unknown")),
+        "Stage": _select(account.get("stage", "unknown")),
+    }
+    r = requests.patch(
+        f"https://api.notion.com/v1/pages/{page_id}",
+        headers=_HEADERS,
+        json={"properties": properties},
+        timeout=30,
+    )
+    if not r.ok:
+        print(f"\n  [notion error] {r.status_code}: {r.text}")
+    r.raise_for_status()
