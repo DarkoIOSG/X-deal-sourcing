@@ -9,9 +9,13 @@ Run:
 """
 
 import sys
+import time
 import requests
 import anthropic
 from config import SORSA_API_KEY, SORSA_BASE_URL, ANTHROPIC_API_KEY
+from state import init_db, get_known_ids, add_account
+from api.notion import create_page
+from api.sorsa import get_profiles_batch
 
 if not SORSA_API_KEY:
     sys.exit("Missing TweetScout_API_key in .env")
@@ -199,6 +203,68 @@ def print_result(r: dict, analysis: dict, idx: int):
             print(f"               - {e}")
 
 
+# ── Notion push ───────────────────────────────────────────────────────────────
+def push_new_projects(analyzed: list[tuple[dict, dict]]):
+    init_db()
+    known_ids = get_known_ids()
+
+    seen: set[str] = set()
+    candidates: list[tuple[dict, dict]] = []
+    for r, analysis in analyzed:
+        uid = r["author_id"]
+        if analysis["type"] != "project" or uid in known_ids or uid in seen:
+            continue
+        seen.add(uid)
+        candidates.append((r, analysis))
+
+    if not candidates:
+        print("\nNo new projects to add to Notion.")
+        return
+
+    print(f"\n{len(candidates)} new project(s) found via search. Enriching profiles...")
+
+    ids = [r["author_id"] for r, _ in candidates]
+    profiles = {p["id"]: p for p in get_profiles_batch(ids)}
+
+    added = 0
+    for r, analysis in candidates:
+        uid = r["author_id"]
+        p = profiles.get(uid, {})
+
+        account = {
+            "id":               uid,
+            "display_name":     p.get("display_name") or r["name"],
+            "username":         p.get("username") or r["username"],
+            "description":      p.get("description") or r["bio"],
+            "followers_count":  p.get("followers_count") if p.get("followers_count") is not None else r["followers"],
+            "followings_count": p.get("followings_count"),
+            "tweets_count":     p.get("tweets_count") if p.get("tweets_count") is not None else r["tweet_count"],
+            "verified":         p.get("verified", False),
+            "created_at":       p.get("created_at") or r["account_created"],
+            "last_tweet_date":  r["created_at"],
+            "watcher_count":    0,
+            "watchers":         [],
+            "tweet_analysis":   analysis["description"],
+            "entities":         analysis["entities"],
+            "account_type":     "project",
+            "one_liner":        analysis["one_liner"],
+            "sector":           analysis["sectors"],
+            "token_status":     analysis["token_status"],
+            "stage":            analysis["stage"],
+        }
+
+        try:
+            page_id = create_page(account)
+            add_account(uid, page_id)
+            added += 1
+            print(f"  + Added @{account['username']} to Notion")
+        except Exception as e:
+            print(f"  ! Failed @{account['username']}: {e}")
+        time.sleep(0.3)
+
+    print(f"{added}/{len(candidates)} project(s) added to Notion.")
+
+
 # ── main ──────────────────────────────────────────────────────────────────────
 def main():
     print(f"Searching X for:\n  {QUERY}\n")
@@ -220,12 +286,16 @@ def main():
         print("No results passed filters. Try lowering MIN_LIKES / MIN_FOLLOWERS.")
         return
 
+    analyzed: list[tuple[dict, dict]] = []
     for i, r in enumerate(filtered, 1):
         analysis = analyze(r["tweet_text"], r["bio"])
         print_result(r, analysis, i)
+        analyzed.append((r, analysis))
 
     print(f"\n{'─' * 60}")
     print(f"Done. {len(filtered)} result(s) shown.")
+
+    push_new_projects(analyzed)
 
 
 if __name__ == "__main__":
