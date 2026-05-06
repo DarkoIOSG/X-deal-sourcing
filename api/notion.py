@@ -61,7 +61,7 @@ def create_page(account: dict) -> str:
     properties = {
         "Name": _title(account.get("display_name") or account.get("username", "")),
         "X Profile": _url(profile_url),
-        "Account ID": _text(account["id"]),
+        "Account ID": _number(int(account["id"]) if account.get("id") else None),
         "Username": _text(account.get("username", "")),
         "Account Created": _date(account.get("created_at", "")),
         "Watcher Count": _number(account.get("watcher_count")),
