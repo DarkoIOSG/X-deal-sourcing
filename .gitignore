@@ -5,3 +5,8 @@ __pycache__/
 *.pyo
 state.db
 .DS_Store
+
+# IC data — sensitive, keep local only
+data/
+IC_transcripts.zip
+iosg_research.zip
