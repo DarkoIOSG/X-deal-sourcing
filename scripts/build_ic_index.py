@@ -34,6 +34,13 @@ def chunk_text(text: str) -> list[str]:
         chunks.append(current)
     return chunks
 
+def make_prefix(source_type: str, filename: str, date: str | None) -> str:
+    """Prepend file context to every chunk so mid-sentence fragments are still meaningful."""
+    label = "IC discussion" if source_type == "ic" else "Research"
+    stem = Path(filename).stem.replace("_", " ")
+    date_str = f" | {date}" if date else ""
+    return f"[{label}: {stem}{date_str}]\n\n"
+
 def load_records() -> list[dict]:
     records = []
     for source_type, directory in SOURCES:
@@ -42,13 +49,15 @@ def load_records() -> list[dict]:
         for path in list(directory.rglob("*.md")) + list(directory.rglob("*.txt")):
             text = path.read_text(encoding="utf-8", errors="ignore")
             date = parse_date(path.name)
+            prefix = make_prefix(source_type, path.name, date)
             for i, chunk in enumerate(chunk_text(text)):
                 records.append({
                     "id": f"{source_type}-{path.stem}-{i}",
                     "source_type": source_type,
                     "source_file": path.name,
                     "date": date,
-                    "text": chunk,
+                    "text": prefix + chunk,   # prefix embedded, raw chunk stored
+                    "raw_text": chunk,
                 })
     return records
 

@@ -27,7 +27,7 @@ def retrieve_ic_context(query: str, top_k: int = 4) -> list[dict]:
     top = np.argsort(-sims)[:top_k]
     return [
         {
-            "text": _records[i]["text"],
+            "text": _records[i].get("raw_text") or _records[i]["text"],
             "source_type": _records[i]["source_type"],
             "source_file": _records[i]["source_file"],
             "date": _records[i]["date"],
