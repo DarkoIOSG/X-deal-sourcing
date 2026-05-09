@@ -55,6 +55,24 @@ def get_profiles_batch(user_ids: list[str]) -> list[dict]:
     return all_users
 
 
+def search_tweets(query: str, order: str = "popular", max_results: int = 100) -> list[dict]:
+    """Search tweets with cursor-based pagination up to max_results."""
+    tweets = []
+    cursor = None
+    while len(tweets) < max_results:
+        payload = {"query": query, "order": order}
+        if cursor:
+            payload["next_cursor"] = cursor
+        data = _post("/search-tweets", payload)
+        batch = data.get("tweets", [])
+        tweets.extend(batch)
+        cursor = data.get("next_cursor")
+        if not cursor or not batch:
+            break
+        time.sleep(0.3)
+    return tweets[:max_results]
+
+
 def get_user_tweets(user_id: str, max_tweets: int = 20) -> list[dict]:
     tweets = []
     cursor = None

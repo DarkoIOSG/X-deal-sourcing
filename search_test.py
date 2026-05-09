@@ -10,12 +10,11 @@ Run:
 
 import sys
 import time
-import requests
 import anthropic
-from config import SORSA_API_KEY, SORSA_BASE_URL, ANTHROPIC_API_KEY
+from config import SORSA_API_KEY, ANTHROPIC_API_KEY
 from state import init_db, get_known_ids, add_account
 from api.notion import create_page
-from api.sorsa import get_profiles_batch
+from api.sorsa import get_profiles_batch, search_tweets
 
 if not SORSA_API_KEY:
     sys.exit("Missing TweetScout_API_key in .env")
@@ -39,22 +38,9 @@ QUERY = (
 )
 
 ORDER         = "popular"  # "popular" or "latest"
+MAX_RESULTS   = 200        # max tweets to fetch per run (pagination)
 MIN_LIKES     = 20         # filter: skip low-engagement tweets
 MIN_FOLLOWERS = 200        # filter: skip tiny accounts
-
-# ── Sorsa helpers ─────────────────────────────────────────────────────────────
-HEADERS = {"ApiKey": SORSA_API_KEY, "Accept": "application/json"}
-
-
-def search_tweets(query: str, order: str = "popular") -> list[dict]:
-    url = f"{SORSA_BASE_URL}/search-tweets"
-    payload = {"query": query, "order": order}
-    r = requests.post(url, headers={**HEADERS, "Content-Type": "application/json"},
-                      json=payload, timeout=30)
-    if r.status_code == 401:
-        sys.exit("Sorsa 401 — check your TweetScout_API_key in .env")
-    r.raise_for_status()
-    return r.json().get("tweets", [])
 
 
 def parse_tweets(tweets: list[dict]) -> list[dict]:
@@ -269,7 +255,7 @@ def push_new_projects(analyzed: list[tuple[dict, dict]]):
 def main():
     print(f"Searching X for:\n  {QUERY}\n")
 
-    raw     = search_tweets(QUERY, ORDER)
+    raw     = search_tweets(QUERY, ORDER, MAX_RESULTS)
     results = parse_tweets(raw)
 
     print(f"Found {len(results)} tweet(s). Filtering (min {MIN_LIKES} likes, min {MIN_FOLLOWERS} followers)...")
