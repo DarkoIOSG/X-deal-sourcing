@@ -82,7 +82,7 @@ def deep_dive(project, thesis_doc, phase2_json, max_iters=15):
     for iter_num in range(1, max_iters + 1):
         resp = client.messages.create(
             model=MODEL,
-            max_tokens=4096,
+            max_tokens=16000,
             system=SYSTEM_PROMPT,
             tools=TOOLS,
             messages=messages,
