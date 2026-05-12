@@ -16,11 +16,14 @@ candidates = query_candidates(status="Scored", recommendation="deep_dive")
 project = next((p for p in candidates if p["username"].lower() == handle), None)
 
 if not project:
-    # also check watch
     candidates2 = query_candidates(status="Scored", recommendation="watch")
     project = next((p for p in candidates2 if p["username"].lower() == handle), None)
 
 if not project:
-    sys.exit(f"@{handle} not found in Notion (Scored + deep_dive or watch)")
+    candidates3 = query_candidates(status="Scored", recommendation="pass")
+    project = next((p for p in candidates3 if p["username"].lower() == handle), None)
+
+if not project:
+    sys.exit(f"@{handle} not found in Notion (Scored + deep_dive / watch / pass)")
 
 print(json.dumps(project, indent=2, ensure_ascii=False))
