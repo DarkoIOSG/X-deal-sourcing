@@ -38,7 +38,7 @@ QUERY = (
 )
 
 ORDER         = "popular"  # "popular" or "latest"
-MAX_RESULTS   = 200        # max tweets to fetch per run (pagination)
+MAX_RESULTS   = 500        # max tweets to fetch per run (pagination)
 MIN_LIKES     = 20         # filter: skip low-engagement tweets
 MIN_FOLLOWERS = 200        # filter: skip tiny accounts
 
