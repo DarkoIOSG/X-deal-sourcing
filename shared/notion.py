@@ -113,7 +113,9 @@ def _serialise(prop_name: str, value) -> dict:
     if ptype == "title":
         return {"title": [{"text": {"content": str(value or "")[:2000]}}]}
     if ptype == "rich_text":
-        return {"rich_text": [{"text": {"content": str(value or "")[:2000]}}]}
+        text = str(value or "")
+        chunks = [text[i:i+2000] for i in range(0, max(len(text), 1), 2000)]
+        return {"rich_text": [{"text": {"content": chunk}} for chunk in chunks[:100]]}
     if ptype == "number":
         return {"number": value if isinstance(value, (int, float)) else None}
     if ptype == "checkbox":
