@@ -51,4 +51,14 @@ Red flags from your investigation. Be honest. This is the most valuable section.
 ## Sources
 URLs fetched, with a one-line note on what each contributed.
 
-After writing the memo, your turn ends. Do not continue.
+After the memo, append a funding summary block on a new line exactly like this (no extra text around it):
+
+FUNDING_DATA
+raised: true | false
+last_round_date: YYYY-MM-DD | unknown
+last_round_amount: e.g. "$4.5M seed" | unknown
+END_FUNDING_DATA
+
+Use the funding research from step 3 to fill this in. If no raise was found, set raised to false and the rest to unknown.
+
+After writing the memo and funding block, your turn ends. Do not continue.

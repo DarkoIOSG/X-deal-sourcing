@@ -20,6 +20,7 @@ from pathlib import Path
 from shared.notion import (
     query_candidates, update_row,
     PROP_MEMO, PROP_STATUS, PROP_LAST_TOUCHED,
+    PROP_RAISED, PROP_LAST_ROUND_DATE, PROP_LAST_ROUND_AMOUNT,
 )
 from deep_dive.agent import deep_dive_and_log
 
@@ -81,13 +82,19 @@ def main():
 
         try:
             project = _project_from_notion(page)
-            memo = deep_dive_and_log(project, thesis, scoring_json)
+            memo, funding = deep_dive_and_log(project, thesis, scoring_json)
 
-            update_row(notion_id, {
+            fields = {
                 PROP_MEMO:         memo,
                 PROP_STATUS:       "Deep_Dived",
                 PROP_LAST_TOUCHED: today,
-            })
+                PROP_RAISED:       funding["raised"],
+            }
+            if funding["last_round_date"]:
+                fields[PROP_LAST_ROUND_DATE] = funding["last_round_date"]
+            if funding["last_round_amount"]:
+                fields[PROP_LAST_ROUND_AMOUNT] = funding["last_round_amount"]
+            update_row(notion_id, fields)
 
             print(f"  [ok] Memo written to Notion — {handle}")
             done += 1

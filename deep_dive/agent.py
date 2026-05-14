@@ -74,6 +74,30 @@ def _serialize_block(block):
     return str(block)
 
 
+def _parse_funding_block(text: str) -> tuple[str, dict]:
+    """Split memo text from FUNDING_DATA block. Returns (memo, funding_dict)."""
+    funding = {"raised": False, "last_round_date": None, "last_round_amount": None}
+    if "FUNDING_DATA" not in text:
+        return text.strip(), funding
+
+    memo_part, _, block = text.partition("FUNDING_DATA")
+    block, _, _ = block.partition("END_FUNDING_DATA")
+
+    for line in block.splitlines():
+        line = line.strip()
+        if line.startswith("raised:"):
+            val = line.split(":", 1)[1].strip().lower()
+            funding["raised"] = val == "true"
+        elif line.startswith("last_round_date:"):
+            val = line.split(":", 1)[1].strip()
+            funding["last_round_date"] = None if val == "unknown" else val
+        elif line.startswith("last_round_amount:"):
+            val = line.split(":", 1)[1].strip()
+            funding["last_round_amount"] = None if val == "unknown" else val
+
+    return memo_part.strip(), funding
+
+
 def deep_dive(project, thesis_doc, phase2_json, max_iters=15):
     """Run the agent loop. Returns {memo, trace, iters}."""
     user_msg = render_user_message(project, thesis_doc, phase2_json)
@@ -90,11 +114,12 @@ def deep_dive(project, thesis_doc, phase2_json, max_iters=15):
         messages.append({"role": "assistant", "content": resp.content})
 
         if resp.stop_reason == "end_turn":
-            memo = "".join(
+            full_text = "".join(
                 getattr(b, "text", "") for b in resp.content
                 if getattr(b, "type", None) == "text"
             )
-            return {"memo": memo, "trace": messages, "iters": iter_num}
+            memo, funding = _parse_funding_block(full_text)
+            return {"memo": memo, "funding": funding, "trace": messages, "iters": iter_num}
 
         if resp.stop_reason == "tool_use":
             tool_results = []
@@ -148,7 +173,8 @@ def deep_dive_and_log(project, thesis_doc, phase2_json):
         "handle": project.get("handle"),
         "iters": result["iters"],
         "memo": result["memo"],
+        "funding": result["funding"],
         "trace": serializable_trace,
     }, indent=2, ensure_ascii=False, default=str))
     print(f"\n[Trace logged: {log_path}]")
-    return result["memo"]
+    return result["memo"], result["funding"]

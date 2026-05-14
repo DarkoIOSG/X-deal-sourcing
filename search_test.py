@@ -200,6 +200,8 @@ def push_new_projects(analyzed: list[tuple[dict, dict]]):
         uid = r["author_id"]
         if analysis["type"] != "project" or uid in known_ids or uid in seen:
             continue
+        if analysis.get("token_status") == "has token":
+            continue
         seen.add(uid)
         candidates.append((r, analysis))
 

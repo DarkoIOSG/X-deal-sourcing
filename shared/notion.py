@@ -49,6 +49,11 @@ PROP_PROCESSED_AT   = "Processed_At"
 PROP_FILTERED_REASON = "Filtered_Reason"
 PROP_LAST_TOUCHED   = "Notion_Last_Touched"
 
+# Funding data (populated during deep dive)
+PROP_RAISED         = "Raised"
+PROP_LAST_ROUND_DATE   = "Last Round Date"
+PROP_LAST_ROUND_AMOUNT = "Last Round Amount"
+
 # IC feedback (manual)
 PROP_IC_DECISION    = "IC_Decision"
 PROP_IC_WHY         = "IC_Why"
@@ -87,6 +92,9 @@ _FIELD_TYPES: dict[str, str] = {
     PROP_STAGE:          "select",
     PROP_IC_DECISION:    "select",
     PROP_SECTOR:         "multi_select",
+    PROP_RAISED:         "checkbox",
+    PROP_LAST_ROUND_DATE:   "date",
+    PROP_LAST_ROUND_AMOUNT: "rich_text",
 }
 
 _HEADERS = {
