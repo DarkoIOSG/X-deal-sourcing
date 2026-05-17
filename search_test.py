@@ -13,7 +13,7 @@ import time
 import anthropic
 from config import SORSA_API_KEY, ANTHROPIC_API_KEY
 from state import init_db, get_known_ids, add_account
-from api.notion import create_page
+from api.notion import create_page, username_exists
 from api.sorsa import get_profiles_batch, search_tweets
 
 if not SORSA_API_KEY:
@@ -242,6 +242,9 @@ def push_new_projects(analyzed: list[tuple[dict, dict]]):
         }
 
         try:
+            if username_exists(account["username"]):
+                print(f"  [skip] @{account['username']} already in Notion")
+                continue
             page_id = create_page(account)
             add_account(uid, page_id)
             added += 1

@@ -5,7 +5,6 @@ from pipeline.aggregate import aggregate
 from pipeline.enrich import enrich_profiles, enrich_tweets
 from pipeline.analyze import analyze_accounts
 from pipeline.notion_sync import sync_to_notion
-from pipeline.telegram_notify import notify_new_projects
 
 
 def main():
@@ -38,9 +37,6 @@ def main():
 
     print("Syncing to Notion...")
     sync_to_notion(new_accounts)
-
-    print("Sending Telegram notifications...")
-    notify_new_projects(new_accounts)
 
     log_run(len(watchlist), len(new_accounts))
     print(f"\nDone. {len(new_accounts)} new accounts added to Notion.")

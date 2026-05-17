@@ -54,6 +54,25 @@ def _date(value: str) -> dict:
     return {"date": {"start": parsed} if parsed else None}
 
 
+def username_exists(username: str) -> bool:
+    """Return True if a page with this username already exists in the database."""
+    payload = {
+        "filter": {
+            "property": "Username",
+            "rich_text": {"equals": username.lstrip("@").lower()},
+        },
+        "page_size": 1,
+    }
+    r = requests.post(
+        f"https://api.notion.com/v1/databases/{NOTION_DATABASE_ID}/query",
+        headers=_HEADERS,
+        json=payload,
+        timeout=30,
+    )
+    r.raise_for_status()
+    return len(r.json().get("results", [])) > 0
+
+
 def create_page(account: dict) -> str:
     profile_url = f"https://x.com/i/user/{account['id']}"
     watchers_str = ", ".join(account.get("watchers", []))
