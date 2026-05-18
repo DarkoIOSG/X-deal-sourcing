@@ -50,10 +50,12 @@ PROP_FILTERED_REASON = "Filtered_Reason"
 PROP_LAST_TOUCHED   = "Notion_Last_Touched"
 
 # Funding data (populated during deep dive / Surf enrichment)
-PROP_RAISED            = "Raised"
-PROP_LAST_ROUND_DATE   = "Last Round Date"
-PROP_LAST_ROUND_AMOUNT = "Last Round Amount"
-PROP_INVESTORS         = "Investors"
+PROP_CHECKED_ON_SURF       = "Checked On Surf"
+PROP_RAISED                = "Raised"
+PROP_LAST_ROUND_DATE       = "Last Round Date"
+PROP_LAST_ROUND_AMOUNT     = "Last Round Amount"
+PROP_LAST_ROUND_VALUATION  = "Last Round Valuation"
+PROP_INVESTORS             = "Investors"
 
 # IC feedback (manual)
 PROP_IC_DECISION    = "IC_Decision"
@@ -93,10 +95,12 @@ _FIELD_TYPES: dict[str, str] = {
     PROP_STAGE:          "select",
     PROP_IC_DECISION:    "select",
     PROP_SECTOR:         "multi_select",
-    PROP_RAISED:            "checkbox",
-    PROP_LAST_ROUND_DATE:   "date",
-    PROP_LAST_ROUND_AMOUNT: "rich_text",
-    PROP_INVESTORS:         "rich_text",
+    PROP_CHECKED_ON_SURF:       "checkbox",
+    PROP_RAISED:                "checkbox",
+    PROP_LAST_ROUND_DATE:       "date",
+    PROP_LAST_ROUND_AMOUNT:     "rich_text",
+    PROP_LAST_ROUND_VALUATION:  "rich_text",
+    PROP_INVESTORS:             "rich_text",
 }
 
 _HEADERS = {

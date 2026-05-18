@@ -23,8 +23,9 @@ load_dotenv()
 
 from config import SURF_API_KEY
 from shared.notion import (
-    query_candidates, update_row,
-    PROP_RAISED, PROP_LAST_ROUND_DATE, PROP_LAST_ROUND_AMOUNT, PROP_INVESTORS,
+    update_row, _DB_URL, _HEADERS, _parse_page,
+    PROP_CHECKED_ON_SURF, PROP_RAISED, PROP_LAST_ROUND_DATE,
+    PROP_LAST_ROUND_AMOUNT, PROP_LAST_ROUND_VALUATION, PROP_INVESTORS,
 )
 
 SURF_URL = "https://api.asksurf.ai/gateway/v1/project/detail"
@@ -56,18 +57,24 @@ def parse_funding(funding: dict) -> dict:
 
     raised = total > 0 or bool(rounds)
 
-    last_date   = None
-    last_amount = None
-    investors   = None
+    last_date      = None
+    last_amount    = None
+    last_valuation = None
+    investors      = None
 
     if latest:
-        last_date = latest.get("date")  # already YYYY-MM-DD
-        amount    = latest.get("amount")
+        last_date  = latest.get("date")
+        amount     = latest.get("amount")
+        valuation  = latest.get("valuation")
         round_name = latest.get("round_name", "")
+
         if amount:
             last_amount = f"${amount/1_000_000:.1f}M {round_name}".strip()
         elif round_name:
             last_amount = round_name
+
+        if valuation:
+            last_valuation = f"${valuation/1_000_000:.0f}M"
 
         investor_names = [
             i["name"] for i in latest.get("investors", []) if i.get("name")
@@ -76,47 +83,73 @@ def parse_funding(funding: dict) -> dict:
             investors = ", ".join(investor_names)
 
     return {
-        "raised":      raised,
-        "last_date":   last_date,
-        "last_amount": last_amount,
-        "investors":   investors,
-        "total_raise": total,
-        "num_rounds":  len(rounds),
+        "raised":          raised,
+        "last_date":       last_date,
+        "last_amount":     last_amount,
+        "last_valuation":  last_valuation,
+        "investors":       investors,
+        "total_raise":     total,
+        "num_rounds":      len(rounds),
     }
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--handle", type=str, default=None, help="Test a single account e.g. @Outcomexyz")
     args = parser.parse_args()
 
     print(f"\n=== Funding Enrichment — {datetime.now().strftime('%Y-%m-%d %H:%M')} ===\n")
 
-    deep_dives = query_candidates(status="Scored", recommendation="deep_dive")
-    watches    = query_candidates(status="Scored", recommendation="watch")
-    # also pick up already deep-dived projects
-    from shared.notion import _DB_URL, _HEADERS, _parse_page
     import requests as req
-    payload = {
-        "filter": {
-            "or": [
-                {"property": "Recommendation", "select": {"equals": "deep_dive"}},
-                {"property": "Recommendation", "select": {"equals": "watch"}},
-            ]
-        },
-        "sorts": [{"property": "Score", "direction": "descending"}],
-        "page_size": 100,
-    }
-    r = req.post(_DB_URL, headers=_HEADERS, json=payload, timeout=30)
-    r.raise_for_status()
-    projects = [_parse_page(p) for p in r.json().get("results", [])]
 
-    print(f"Found {len(projects)} projects (watch + deep_dive)\n")
+    if args.handle:
+        handle_clean = args.handle.lstrip("@").lower()
+        payload = {
+            "filter": {"property": "Username", "rich_text": {"equals": handle_clean}},
+            "page_size": 1,
+        }
+        r = req.post(_DB_URL, headers=_HEADERS, json=payload, timeout=30)
+        r.raise_for_status()
+        projects = [_parse_page(p) for p in r.json().get("results", [])]
+        if not projects:
+            print(f"@{handle_clean} not found in Notion.")
+            return
+        print(f"Testing single project: @{handle_clean}\n")
+    else:
+        payload = {
+            "filter": {
+                "and": [
+                    {
+                        "or": [
+                            {"property": "Recommendation", "select": {"equals": "deep_dive"}},
+                            {"property": "Recommendation", "select": {"equals": "watch"}},
+                        ]
+                    },
+                    {"property": "Checked On Surf", "checkbox": {"equals": False}},
+                ]
+            },
+            "sorts": [{"property": "Score", "direction": "descending"}],
+            "page_size": 100,
+        }
+        projects = []
+        cursor = None
+        while True:
+            if cursor:
+                payload["start_cursor"] = cursor
+            r = req.post(_DB_URL, headers=_HEADERS, json=payload, timeout=30)
+            r.raise_for_status()
+            data = r.json()
+            projects.extend(_parse_page(p) for p in data.get("results", []))
+            if not data.get("has_more"):
+                break
+            cursor = data.get("next_cursor")
+        print(f"Found {len(projects)} unchecked projects (watch + deep_dive)\n")
 
-    found = skipped = failed = 0
+    found = not_found = failed = 0
 
     for p in projects:
-        handle   = p.get("username", "")
+        handle    = p.get("username", "")
         notion_id = p["notion_id"]
 
         print(f"  @{handle:<25}", end=" ", flush=True)
@@ -130,13 +163,14 @@ def main():
             continue
 
         if funding is None:
-            print("[not found]")
-            skipped += 1
+            print("[not found in Surf]")
+            if not args.dry_run:
+                update_row(notion_id, {PROP_CHECKED_ON_SURF: True})
+            not_found += 1
             time.sleep(0.5)
             continue
 
         parsed = parse_funding(funding)
-
         print(
             f"raised={parsed['raised']}  "
             f"rounds={parsed['num_rounds']}  "
@@ -146,22 +180,31 @@ def main():
 
         if not args.dry_run:
             fields = {
-                PROP_RAISED: parsed["raised"],
+                PROP_CHECKED_ON_SURF: True,
+                PROP_RAISED:          parsed["raised"],
             }
             if parsed["last_date"]:
                 fields[PROP_LAST_ROUND_DATE] = parsed["last_date"]
             if parsed["last_amount"]:
                 fields[PROP_LAST_ROUND_AMOUNT] = parsed["last_amount"]
+            if parsed["last_valuation"]:
+                fields[PROP_LAST_ROUND_VALUATION] = parsed["last_valuation"]
             if parsed["investors"]:
                 fields[PROP_INVESTORS] = parsed["investors"]
-            update_row(notion_id, fields)
+            try:
+                update_row(notion_id, fields)
+            except Exception as e:
+                print(f"\n  [notion error] @{handle}: {e}")
+                failed += 1
+                time.sleep(1)
+                continue
 
         found += 1
         time.sleep(0.5)
 
     sep = "─" * 55
     print(f"\n{sep}")
-    print(f"  Done. {found} enriched, {skipped} not in Surf, {failed} errors.")
+    print(f"  Done. {found} enriched, {not_found} not in Surf, {failed} errors.")
     if args.dry_run:
         print("  [dry-run] No changes written to Notion.")
     print(sep)
