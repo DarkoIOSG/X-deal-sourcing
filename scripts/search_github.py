@@ -29,7 +29,7 @@ KEYWORDS = [
     "ai agent defi",
 ]
 
-DAYS_BACK      = 30     # only repos created or pushed in the last N days
+DAYS_BACK      = 90     # only repos created or pushed in the last N days
 MIN_STARS      = 5      # skip repos with no traction at all
 MAX_RESULTS    = 50     # results per keyword
 SHOW_README    = False  # set True to fetch and print README snippets (slower)
