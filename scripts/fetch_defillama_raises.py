@@ -21,7 +21,7 @@ from datetime import datetime, timezone, timedelta
 import requests
 
 sys.path.insert(0, ".")
-from config import NOTION_TOKEN, NOTION_DATABASE_ID, EXA_API_KEY
+from config import NOTION_TOKEN, NOTION_DATABASE_ID, EXA_API_KEY, DEFILLAMA_API_KEY
 from api.sorsa import search_tweets, username_to_id, get_profiles_batch
 from exa_py import Exa
 
@@ -50,7 +50,6 @@ def _extract_handle(text: str) -> str | None:
     return None
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
-DEFILLAMA_API_KEY = "xxxx"
 RAISES_URL = f"https://pro-api.llama.fi/{DEFILLAMA_API_KEY}/api/raises"
 
 _NOTION_HEADERS = {

@@ -5,6 +5,7 @@ load_dotenv(override=True)
 
 SORSA_API_KEY = os.getenv("TweetScout_API_key")
 EXA_API_KEY = os.getenv("EXA_API_KEY")
+DEFILLAMA_API_KEY = os.getenv("DEFILLAMA_API_KEY")
 SURF_API_KEY  = os.getenv("SURF_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_key")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
