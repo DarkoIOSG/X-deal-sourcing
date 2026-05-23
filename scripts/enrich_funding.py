@@ -7,7 +7,7 @@ For each project with Recommendation = watch or deep_dive:
   3. Write results back to Notion
 
 Notion fields updated: Raised, Last Round Date, Last Round Amount,
-Last Round Valuation, Investors, Checked On Surf.
+Last Round Valuation, Investors, Checked Fundraising.
 
 Run:
   python3 scripts/enrich_funding.py
@@ -246,7 +246,7 @@ def main():
                             {"property": "Recommendation", "select": {"equals": "watch"}},
                         ]
                     },
-                    {"property": "Checked On Surf", "checkbox": {"equals": False}},
+                    {"property": "Checked Fundraising", "checkbox": {"equals": False}},
                 ]
             },
             "sorts": [{"property": "Score", "direction": "descending"}],

@@ -50,7 +50,7 @@ PROP_FILTERED_REASON = "Filtered_Reason"
 PROP_LAST_TOUCHED   = "Notion_Last_Touched"
 
 # Funding data (populated during deep dive / Surf enrichment)
-PROP_CHECKED_ON_SURF       = "Checked On Surf"
+PROP_CHECKED_ON_SURF       = "Checked Fundraising"
 PROP_RAISED                = "Raised"
 PROP_LAST_ROUND_DATE       = "Last Round Date"
 PROP_LAST_ROUND_AMOUNT     = "Last Round Amount"

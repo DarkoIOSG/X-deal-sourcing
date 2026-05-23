@@ -270,7 +270,7 @@ def push_to_notion(raise_: dict, handle: str | None, profile: dict | None) -> st
         "Token Status":       _select("unknown"),
         "Status":             _select("New"),
         "Raised":             _checkbox(True),
-        "Checked On Surf":    _checkbox(True),
+        "Checked Fundraising": _checkbox(True),
         "Last Round Date":    _date(raise_date),
         "Last Round Amount":  _text(amount_str),
         "Last Round Valuation": _text(str(raise_["valuation"]) if raise_.get("valuation") else ""),
