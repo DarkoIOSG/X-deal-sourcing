@@ -108,11 +108,11 @@ def search_repos(keyword: str, days_back: int = DAYS_BACK,
 
 
 def fetch_readme(full_name: str) -> str:
-    r = requests.get(f"https://api.github.com/repos/{full_name}/readme",
-                     headers=GH_HEADERS, timeout=15)
-    if not r.ok:
-        return ""
     try:
+        r = requests.get(f"https://api.github.com/repos/{full_name}/readme",
+                         headers=GH_HEADERS, timeout=15)
+        if not r.ok:
+            return ""
         return base64.b64decode(r.json().get("content", "")).decode("utf-8", errors="ignore")[:3000]
     except Exception:
         return ""
@@ -121,10 +121,13 @@ def fetch_readme(full_name: str) -> str:
 def _github_owner_twitter(login: str, owner_type: str) -> str | None:
     """Call the GitHub org or user endpoint — both expose a twitter_username field."""
     endpoint = "orgs" if owner_type == "Organization" else "users"
-    r = requests.get(f"https://api.github.com/{endpoint}/{login}",
-                     headers=GH_HEADERS, timeout=15)
-    if r.ok:
-        return r.json().get("twitter_username") or None
+    try:
+        r = requests.get(f"https://api.github.com/{endpoint}/{login}",
+                         headers=GH_HEADERS, timeout=15)
+        if r.ok:
+            return r.json().get("twitter_username") or None
+    except requests.exceptions.Timeout:
+        pass
     return None
 
 

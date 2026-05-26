@@ -6,10 +6,10 @@ resolves X handles via DeFiLlama protocol pages + Sorsa search fallback,
 and pushes new entries to Notion with Status = "New" and funding data pre-filled.
 
 Usage:
-    python scripts/fetch_defillama_raises.py            # live run (last 30 days)
-    python scripts/fetch_defillama_raises.py --dry-run  # skip Notion writes
-    python scripts/fetch_defillama_raises.py --days 7   # last 7 days
-    python scripts/fetch_defillama_raises.py --sample   # print raw API output and exit
+    python3 scripts/fetch_defillama_raises.py            # live run (last 30 days)
+    python3 scripts/fetch_defillama_raises.py --dry-run  # skip Notion writes
+    python3 scripts/fetch_defillama_raises.py --days 7   # last 7 days
+    python3 scripts/fetch_defillama_raises.py --sample   # print raw API output and exit
 """
 import argparse
 import json
