@@ -48,6 +48,14 @@ KEYWORDS = [
     "onchain payments",
     "rwa tokenization",
     "ai agent defi",
+    # alt ecosystems
+    "arc protocol defi",
+    "arc ecosystem dapp",
+    "canton network daml",
+    "canton network defi",
+    "daml smart contract",
+    "tempo network blockchain",
+    "tempo protocol defi",
 ]
 
 DAYS_BACK   = 90   # only repos created or pushed in the last N days

@@ -37,6 +37,38 @@ QUERY = (
     " -filter:retweets lang:en"
 )
 
+# ── alt-ecosystem targeted searches ──────────────────────────────────────────
+# Each ecosystem gets its own keyword set; ecosystem names are crypto-specific
+# enough that we don't need generic crypto filter terms alongside them.
+ECOSYSTEM_SEARCHES: dict[str, list[str]] = {
+    "Arc": [
+        '"Arc Protocol"',
+        '"Arc ecosystem"',
+        '"built on Arc"',
+        '"Arc dApp"',
+        '"ArcFinance"',
+    ],
+    "Tempo": [
+        '"Tempo Network"',
+        '"Tempo Protocol"',
+        '"built on Tempo"',
+        '"Tempo Finance"',
+        '"Tempo blockchain"',
+    ],
+    "Canton": [
+        '"Canton Network"',
+        '"Canton Protocol"',
+        '"built on Canton"',
+        '"Canton blockchain"',
+        '"Canton DeFi"',
+    ],
+}
+
+
+def _ecosystem_query(keywords: list[str]) -> str:
+    return "(" + " OR ".join(keywords) + ") -filter:retweets lang:en"
+
+
 ORDER         = "popular"  # "popular" or "latest"
 MAX_RESULTS   = 500        # max tweets to fetch per run (pagination)
 MIN_LIKES     = 20         # filter: skip low-engagement tweets
@@ -257,34 +289,58 @@ def push_new_projects(analyzed: list[tuple[dict, dict]]):
 
 
 # ── main ──────────────────────────────────────────────────────────────────────
-def main():
-    print(f"Searching X for:\n  {QUERY}\n")
 
-    raw     = search_tweets(QUERY, ORDER, MAX_RESULTS)
+def _run_query(query: str, label: str) -> list[dict]:
+    """Fetch + parse + filter tweets for one query. Returns filtered results."""
+    print(f"\n{'═' * 60}")
+    print(f"  Search: {label}")
+    print(f"  Query : {query}")
+    print(f"{'═' * 60}")
+    raw     = search_tweets(query, ORDER, MAX_RESULTS)
     results = parse_tweets(raw)
-
-    print(f"Found {len(results)} tweet(s). Filtering (min {MIN_LIKES} likes, min {MIN_FOLLOWERS} followers)...")
-
     filtered = [
         r for r in results
         if r["tweet_likes"] >= MIN_LIKES and r["followers"] >= MIN_FOLLOWERS
     ]
     filtered.sort(key=lambda x: x["tweet_likes"], reverse=True)
+    print(f"  {len(filtered)}/{len(results)} passed filters.")
+    return filtered
 
-    print(f"{len(filtered)} passed filters. Running Claude analysis...\n")
 
-    if not filtered:
+def main():
+    all_results: list[dict] = []
+    seen_authors: set[str] = set()
+
+    # main launch-signal search
+    for r in _run_query(QUERY, "Launch keywords (generic)"):
+        if r["author_id"] not in seen_authors:
+            seen_authors.add(r["author_id"])
+            all_results.append(r)
+
+    # alt-ecosystem searches
+    for ecosystem, kws in ECOSYSTEM_SEARCHES.items():
+        query = _ecosystem_query(kws)
+        for r in _run_query(query, f"{ecosystem} ecosystem"):
+            if r["author_id"] not in seen_authors:
+                seen_authors.add(r["author_id"])
+                all_results.append(r)
+
+    print(f"\n{'─' * 60}")
+    print(f"Total unique accounts after dedup: {len(all_results)}")
+
+    if not all_results:
         print("No results passed filters. Try lowering MIN_LIKES / MIN_FOLLOWERS.")
         return
 
+    print("Running Claude analysis...\n")
     analyzed: list[tuple[dict, dict]] = []
-    for i, r in enumerate(filtered, 1):
+    for i, r in enumerate(all_results, 1):
         analysis = analyze(r["tweet_text"], r["bio"])
         print_result(r, analysis, i)
         analyzed.append((r, analysis))
 
     print(f"\n{'─' * 60}")
-    print(f"Done. {len(filtered)} result(s) shown.")
+    print(f"Done. {len(all_results)} result(s) shown.")
 
     push_new_projects(analyzed)
 
