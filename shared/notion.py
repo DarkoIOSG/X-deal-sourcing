@@ -120,7 +120,7 @@ def _serialise(prop_name: str, value) -> dict:
         return {"title": [{"text": {"content": str(value or "")[:2000]}}]}
     if ptype == "rich_text":
         text = str(value or "")
-        chunks = [text[i:i+2000] for i in range(0, max(len(text), 1), 2000)]
+        chunks = [text[i:i+1990] for i in range(0, max(len(text), 1), 1990)]
         return {"rich_text": [{"text": {"content": chunk}} for chunk in chunks[:100]]}
     if ptype == "number":
         return {"number": value if isinstance(value, (int, float)) else None}
@@ -197,12 +197,17 @@ def _parse_page(page: dict) -> dict:
         "token_status":   _read(props, PROP_TOKEN_STATUS),
         "account_type":   _read(props, PROP_ACCOUNT_TYPE),
         "last_tweet":     _read(props, PROP_LAST_TWEET),
-        "status":         _read(props, PROP_STATUS),
-        "score":          _read(props, PROP_SCORE),
-        "recommendation": _read(props, PROP_RECOMMENDATION),
-        "scoring_json":   score_json,
-        "memo":           _read(props, PROP_MEMO),
-        "ic_decision":    _read(props, PROP_IC_DECISION),
+        "status":               _read(props, PROP_STATUS),
+        "score":                _read(props, PROP_SCORE),
+        "recommendation":       _read(props, PROP_RECOMMENDATION),
+        "scoring_json":         score_json,
+        "memo":                 _read(props, PROP_MEMO),
+        "ic_decision":          _read(props, PROP_IC_DECISION),
+        "raised":               _read(props, PROP_RAISED),
+        "last_round_date":      _read(props, PROP_LAST_ROUND_DATE),
+        "last_round_amount":    _read(props, PROP_LAST_ROUND_AMOUNT),
+        "last_round_valuation": _read(props, PROP_LAST_ROUND_VALUATION),
+        "investors":            _read(props, PROP_INVESTORS),
     }
 
 

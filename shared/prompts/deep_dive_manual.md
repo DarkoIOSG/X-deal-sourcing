@@ -24,19 +24,43 @@ If dead/scam after 2 searches → short PASS memo, write to Notion, stop.
 **5.** Write and run `/tmp/write_memo.py`:
 ```python
 import sys; sys.path.insert(0, ".")
-from shared.notion import update_row, PROP_MEMO, PROP_STATUS, PROP_LAST_TOUCHED, PROP_RAISED, PROP_LAST_ROUND_DATE, PROP_LAST_ROUND_AMOUNT, PROP_INVESTORS
+from shared.notion import (
+    get_project, update_row,
+    PROP_MEMO, PROP_STATUS, PROP_LAST_TOUCHED, PROP_RECOMMENDATION,
+    PROP_RAISED, PROP_LAST_ROUND_DATE, PROP_LAST_ROUND_AMOUNT,
+    PROP_LAST_ROUND_VALUATION, PROP_INVESTORS,
+)
 from datetime import datetime
-update_row("<notion_id>", {
-    PROP_MEMO: """<memo>""",
-    PROP_STATUS: "Deep_Dived",
-    PROP_LAST_TOUCHED: datetime.today().strftime("%Y-%m-%d"),
-    PROP_RAISED: <True/False/None>,
-    # PROP_LAST_ROUND_DATE: "YYYY-MM-DD",
-    # PROP_LAST_ROUND_AMOUNT: "$Xm Seed/Series A",
-    # PROP_INVESTORS: "Lead, Co-investor",
-})
+
+notion_id = "<notion_id>"
+existing = get_project(notion_id)
+
+# PASS → "Pass", anything else (WATCH / TAKE_MEETING) → "Watch"
+recommendation = "Pass"  # or "Watch"
+
+fields = {
+    PROP_MEMO:           """<memo>""",
+    PROP_STATUS:         "Deep_Dived",
+    PROP_LAST_TOUCHED:   datetime.today().strftime("%Y-%m-%d"),
+    PROP_RECOMMENDATION: recommendation,
+}
+
+# Populate fundraising fields only if not already set
+fields[PROP_RAISED] = <True/False>          # always set — True if any round exists
+if not existing["last_round_date"]:
+    pass  # fields[PROP_LAST_ROUND_DATE] = "YYYY-MM-DD"   # omit if not disclosed
+if not existing["last_round_amount"]:
+    pass  # fields[PROP_LAST_ROUND_AMOUNT] = "$Xm Seed/Series A"
+if not existing["last_round_valuation"]:
+    pass  # fields[PROP_LAST_ROUND_VALUATION] = "$XM"
+if not existing["investors"]:
+    pass  # fields[PROP_INVESTORS] = "Lead, Co-investor"
+
+update_row(notion_id, fields)
 print("Done")
 ```
+
+Replace each `pass  #` line with the actual assignment when data is available; remove the line entirely when data is not disclosed.
 
 **6.** Print `[ok] @handle → Deep_Dived` or `[error] @handle: reason`.
 
