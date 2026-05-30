@@ -1,0 +1,30 @@
+# Founder watchlist — senior builders at crypto unicorns to monitor for stealth signals.
+# One entry per line. Accepts:
+#   https://x.com/handle
+#   @handle
+#   handle
+#
+# Add VP-level and above: Head of Product, Head of Engineering, Protocol Researchers, Co-founders.
+# Director level and above for large companies (Coinbase, Binance).
+#
+# ── Coinbase ──────────────────────────────────────────────────────────────────
+
+# ── Uniswap Labs ──────────────────────────────────────────────────────────────
+
+# ── dYdX ─────────────────────────────────────────────────────────────────────
+
+# ── Aave / MakerDAO ───────────────────────────────────────────────────────────
+
+# ── Solana Labs ───────────────────────────────────────────────────────────────
+
+# ── Ethereum Foundation ───────────────────────────────────────────────────────
+
+# ── Optimism / Arbitrum / StarkWare / Matter Labs ─────────────────────────────
+
+# ── Chainlink / LayerZero / EigenLayer ───────────────────────────────────────
+
+# ── Binance / OKX / Bybit / Kraken ───────────────────────────────────────────
+
+# ── Circle / Paxos / Fireblocks ───────────────────────────────────────────────
+
+# ── a16z Crypto / Paradigm alumni ────────────────────────────────────────────
