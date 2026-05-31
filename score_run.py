@@ -8,7 +8,7 @@ Phase 2: score survivors with Claude Haiku against thesis.md, write results
          Status → Scored).
 
 Run:
-  python score_run.py
+  python3 score_run.py
 """
 
 import time
@@ -16,7 +16,6 @@ from datetime import datetime
 from tqdm import tqdm
 
 from api.notion import query_new_accounts, update_scoring, update_filtered
-from api.sorsa import get_user_tweets
 from pipeline.score_filter import filter_candidates, EXCLUDED_SECTORS
 from pipeline.score import score_project
 
@@ -63,12 +62,7 @@ def main():
     scored: list[tuple[dict, dict]] = []
     for page in tqdm(candidates, desc="Scoring"):
         try:
-            tweets: list[str] = []
-            if page.get("account_id"):
-                raw = get_user_tweets(page["account_id"], max_tweets=20)
-                tweets = [t.get("full_text", "") for t in raw if t.get("full_text")]
-
-            result = score_project(page, tweets)
+            result = score_project(page)
             update_scoring(page["page_id"], result)
             scored.append((page, result))
         except Exception as e:

@@ -13,6 +13,9 @@ def _username_from_url(url: str) -> str:
     return url.rstrip("/").split("/")[-1]
 
 
+MAX_NEW_FOLLOWS = 200  # accounts with more new follows than this are likely bots or mass-follow accounts
+
+
 def fetch_all_following(watchlist: list[str]) -> dict[str, set[str]]:
     """
     Returns {watchlist_username: set_of_new_followed_user_ids (last 7 days)}
@@ -23,6 +26,10 @@ def fetch_all_following(watchlist: list[str]) -> dict[str, set[str]]:
         try:
             user_id = username_to_id(username)
             following = get_new_following_7d(user_id)
+            if len(following) > MAX_NEW_FOLLOWS:
+                print(f"  {username}: {len(following)} new follows — skipped (likely bot/mass-follow)")
+                result[username] = set()
+                continue
             result[username] = {u["id"] for u in following}
             print(f"  {username}: {len(result[username])} new follows")
         except Exception as e:

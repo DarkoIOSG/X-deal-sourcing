@@ -16,7 +16,7 @@ PROJECT:
 - Handle: {handle}
 - Description: {description}
 - Categories: {categories}
-- Last 20 tweets:
+- Tweet analysis / recent activity:
 {tweets_joined}
 
 Output ONLY valid JSON, no preamble:
@@ -71,14 +71,19 @@ def _load_thesis() -> str:
     return "[thesis.md not found — add it to the project root]"
 
 
-def score_project(page: dict, tweets: list[str]) -> dict:
-    tweets_joined = "\n".join(f"- {t}" for t in tweets) if tweets else "(no tweets available)"
+def score_project(page: dict) -> dict:
+    description = page.get("description", "") or page.get("one_liner", "")
+    one_liner   = page.get("one_liner", "")
+    # Use tweet analysis from Notion (already generated during discovery enrichment)
+    # Format as bullet if non-empty so the prompt structure is preserved
+    tweet_context = description or one_liner or "(no analysis available)"
+    tweets_joined = f"- {tweet_context}" if tweet_context else "(no analysis available)"
     categories = ", ".join(page.get("sectors", [])) or "unknown"
 
     prompt = _PROMPT.format(
         thesis_doc=_load_thesis(),
         handle=page.get("username", "unknown"),
-        description=page.get("description", "") or page.get("one_liner", ""),
+        description=one_liner or description,
         categories=categories,
         tweets_joined=tweets_joined,
     )

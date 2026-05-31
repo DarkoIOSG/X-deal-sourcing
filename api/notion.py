@@ -1,4 +1,3 @@
-import json
 import requests
 from datetime import datetime
 from config import NOTION_TOKEN, NOTION_DATABASE_ID
@@ -227,7 +226,6 @@ def update_scoring(page_id: str, result: dict):
         "Status":          _select("Scored"),
         "Score":           _number(result.get("thesis_fit_score")),
         "Recommendation":  _select(result.get("recommendation", "pass")),
-        "Scoring_JSON":    _text(json.dumps(result)),
         "Processed_At":    _date(datetime.today().strftime("%Y-%m-%d")),
     }
     r = requests.patch(
