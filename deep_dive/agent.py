@@ -76,7 +76,12 @@ def _serialize_block(block):
 
 def _parse_funding_block(text: str) -> tuple[str, dict]:
     """Split memo text from FUNDING_DATA block. Returns (memo, funding_dict)."""
-    funding = {"raised": False, "last_round_date": None, "last_round_amount": None}
+    funding = {
+        "raised": False,
+        "last_round_date": None,
+        "last_round_amount": None,
+        "stage_early_growth": None,
+    }
     if "FUNDING_DATA" not in text:
         return text.strip(), funding
 
@@ -94,6 +99,13 @@ def _parse_funding_block(text: str) -> tuple[str, dict]:
         elif line.startswith("last_round_amount:"):
             val = line.split(":", 1)[1].strip()
             funding["last_round_amount"] = None if val == "unknown" else val
+        elif line.startswith("stage_early_growth:"):
+            val = line.split(":", 1)[1].strip()
+            # Normalise to exactly "Early" or "Growth"; ignore anything else
+            if val.lower() == "early":
+                funding["stage_early_growth"] = "Early"
+            elif val.lower() == "growth":
+                funding["stage_early_growth"] = "Growth"
 
     return memo_part.strip(), funding
 

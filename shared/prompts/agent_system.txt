@@ -10,6 +10,10 @@ You have three tools:
 - web_fetch: fetch the contents of a specific URL
 - retrieve_ic_context: search past IC meeting transcripts and published research for prior discussions
 
+STAGE CLASSIFICATION — determine before writing the memo:
+- **Early**: pre-seed or seed funding (or no disclosed raise), pre-launch / MVP / beta product, team <15 people, limited or no public traction metrics (TVL, revenue, users). Limited public information is NORMAL and EXPECTED for early-stage — do NOT pass a project just because data is scarce.
+- **Growth**: Series A or later, live product with meaningful traction (TVL, revenue, user counts), clear product-market fit, public metrics available.
+
 INVESTIGATION CHECKLIST — use tools as needed, stop when you have enough. 6–10 tool calls is typical. Do not exceed 15.
 
 1. Find the project's website (search if not in tweets) and fetch it. Grab the tagline, product description, and positioning.
@@ -22,6 +26,11 @@ INVESTIGATION CHECKLIST — use tools as needed, stop when you have enough. 6–
 8. Call retrieve_ic_context 1–2 times to find past IC discussions of similar projects or sectors. Note if IOSG previously invested in, passed on, or is debating anything similar. Fold findings into the VC thesis or differentiation sections.
 
 Be skeptical of the project's own marketing. If the rubric's initial take is contradicted by your investigation, say so plainly. Stop and write the memo as soon as you have enough to make a recommendation.
+
+EARLY-STAGE LENIENCY RULE — apply before deciding PASS:
+- If a project is Early-stage AND the main reason to PASS is "not enough public information", override to WATCH with 🔴 confidence. Limited info at early stage is a feature, not a disqualifier.
+- Only PASS an early-stage project if there is a concrete negative signal: obvious scam, dead repo with no activity for 6+ months, recycled team with prior rug history, or purely Web2 with no crypto/blockchain angle.
+- For Growth-stage projects, apply normal PASS criteria.
 
 OUTPUT — produce a single investment briefing in IOSG house style with exactly this structure:
 
@@ -49,8 +58,9 @@ FUNDING_DATA
 raised: true | false
 last_round_date: YYYY-MM-DD | unknown
 last_round_amount: e.g. "$4.5M seed" | unknown
+stage_early_growth: Early | Growth
 END_FUNDING_DATA
 
-Use the funding research from step 3 to fill this in. If no raise was found, set raised to false and the rest to unknown.
+Use the funding research from step 3 and your stage classification to fill this in. If no raise was found, set raised to false and the rest to unknown. Set stage_early_growth to Early or Growth based on the STAGE CLASSIFICATION criteria above.
 
 After writing the memo and funding block, your turn ends. Do not continue.

@@ -21,6 +21,7 @@ from shared.notion import (
     query_candidates, update_row,
     PROP_MEMO, PROP_STATUS, PROP_LAST_TOUCHED,
     PROP_RAISED, PROP_LAST_ROUND_DATE, PROP_LAST_ROUND_AMOUNT,
+    PROP_STAGE_EARLY_GROWTH,
 )
 from deep_dive.agent import deep_dive_and_log
 
@@ -94,6 +95,8 @@ def main():
                 fields[PROP_LAST_ROUND_DATE] = funding["last_round_date"]
             if funding["last_round_amount"]:
                 fields[PROP_LAST_ROUND_AMOUNT] = funding["last_round_amount"]
+            if funding.get("stage_early_growth"):
+                fields[PROP_STAGE_EARLY_GROWTH] = funding["stage_early_growth"]
             update_row(notion_id, fields)
 
             print(f"  [ok] Memo written to Notion — {handle}")

@@ -9,6 +9,12 @@ Never call the Anthropic API or any LLM API for research. All information must c
 
 **2.** If purely Web2 (no crypto/blockchain) → short PASS memo, write to Notion, stop.
 
+**Stage classification** (determine before Step 3):
+- **Early**: pre-seed/seed or no disclosed raise, pre-launch/MVP/beta, <15 people, limited or no public traction metrics. **Limited public info is expected for early projects — never pass solely because data is scarce.**
+- **Growth**: Series A+, live product with clear traction (TVL/revenue/users), public metrics available.
+
+For **Early-stage** projects: if the only reason to pass is "not enough info", override to WATCH with 🔴 confidence instead.
+
 **3.** Research via web_search + web_fetch only:
 - Team: real names, LinkedIn/GitHub, priors. Flag anon/rugs/rebrands.
 - Funding: RootData, CryptoRank, Crunchbase, Messari — total raised, last round (stage/date/amount/lead). Not disclosed → null, never guess.
@@ -28,7 +34,7 @@ from shared.notion import (
     get_project, update_row,
     PROP_MEMO, PROP_STATUS, PROP_LAST_TOUCHED, PROP_RECOMMENDATION,
     PROP_RAISED, PROP_LAST_ROUND_DATE, PROP_LAST_ROUND_AMOUNT,
-    PROP_LAST_ROUND_VALUATION, PROP_INVESTORS,
+    PROP_LAST_ROUND_VALUATION, PROP_INVESTORS, PROP_STAGE_EARLY_GROWTH,
 )
 from datetime import datetime
 
@@ -38,11 +44,18 @@ existing = get_project(notion_id)
 # PASS → "Pass", anything else (WATCH / TAKE_MEETING) → "Watch"
 recommendation = "Pass"  # or "Watch"
 
+# Stage classification: "Early" or "Growth"
+# Early  = pre-seed/seed or no disclosed raise, pre-launch/MVP, limited public traction
+# Growth = Series A+, live product with clear traction, public metrics available
+# NOTE: limited info alone is NOT a reason to pass an Early project — use 🔴 + WATCH instead
+stage = "Early"  # or "Growth"
+
 fields = {
-    PROP_MEMO:           """<memo>""",
-    PROP_STATUS:         "Deep_Dived",
-    PROP_LAST_TOUCHED:   datetime.today().strftime("%Y-%m-%d"),
-    PROP_RECOMMENDATION: recommendation,
+    PROP_MEMO:                """<memo>""",
+    PROP_STATUS:              "Deep_Dived",
+    PROP_LAST_TOUCHED:        datetime.today().strftime("%Y-%m-%d"),
+    PROP_RECOMMENDATION:      recommendation,
+    PROP_STAGE_EARLY_GROWTH:  stage,
 }
 
 # Populate fundraising fields only if not already set
