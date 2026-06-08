@@ -60,6 +60,9 @@ PROP_INVESTORS             = "Investors"
 # Stage classification (populated during deep dive)
 PROP_STAGE_EARLY_GROWTH = "Stage_Early_Growth"
 
+# Audit flag (populated by audit_early_passed.py)
+PROP_AUDIT_FLAG = "Audit_Flag"
+
 # IC feedback (manual)
 PROP_IC_DECISION    = "IC_Decision"
 PROP_IC_WHY         = "IC_Why"
@@ -97,6 +100,7 @@ _FIELD_TYPES: dict[str, str] = {
     PROP_TOKEN_STATUS:   "select",
     PROP_STAGE:               "select",
     PROP_STAGE_EARLY_GROWTH:  "select",
+    PROP_AUDIT_FLAG:          "select",
     PROP_IC_DECISION:         "select",
     PROP_SECTOR:         "multi_select",
     PROP_CHECKED_ON_SURF:       "checkbox",
