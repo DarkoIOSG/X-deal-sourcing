@@ -272,23 +272,6 @@ def _layer1_article(url: str) -> str | None:
         return None
 
 
-def _layer2_exa_x_profile(company: str) -> str | None:
-    """Search Exa restricted to x.com — returns the profile URL which contains the handle."""
-    try:
-        res = _get_exa().search(
-            f"{company} crypto",
-            type="neural",
-            num_results=3,
-            include_domains=["x.com", "twitter.com"],
-        )
-        for r in res.results:
-            h = _extract_handle(r.url)
-            if h:
-                return h
-    except Exception as e:
-        print(f"    [exa-x] {company!r}: {e}")
-    return None
-
 
 def _layer3_tweet_search(company: str) -> str | None:
     """
@@ -350,19 +333,14 @@ def _layer4_exa_company(company: str) -> str | None:
 
 def resolve_x_handle(company: str, article_url: str = "") -> tuple[str | None, str]:
     """
-    Four-layer resolution, cheapest/most direct first:
+    Three-layer resolution, cheapest/most direct first:
       1. Fetch news article → extract X link from page text
-      2. Exa restricted to x.com/twitter.com → handle from profile URL
-      3. Sorsa tweet search for funding announcement → author handle
-      4. Exa company-category search → X link from company website
+      2. Sorsa tweet search for funding announcement → author handle
+      3. Exa company-category search → X link from company website
     """
     h = _layer1_article(article_url)
     if h:
         return h, "article"
-
-    h = _layer2_exa_x_profile(company)
-    if h:
-        return h, "exa_x_profile"
 
     h = _layer3_tweet_search(company)
     if h:
