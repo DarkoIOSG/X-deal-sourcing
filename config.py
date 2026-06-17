@@ -19,5 +19,13 @@ WATCHLIST_FILE = "followed_accounts.txt"
 DB_PATH = "state.db"
 MIN_WATCHERS = 1  # minimum watchlist members that must follow an account to surface it
 
-# Team members shown in the voting webapp voter dropdown — edit to match your team
-TEAM_MEMBERS = ["Jocy", "Momir", "Yiping", "Frank", "Mario"]
+# Voting webapp — team
+TEAM_MEMBERS = ["Darko", "Jocy", "Momir", "Yiping", "Frank", "Mario"]
+
+TEAM_EMAILS: dict[str, str] = {f"{n.lower()}@iosg.vc": n for n in TEAM_MEMBERS}
+
+# Voting webapp — auth (Google OAuth + signed session cookie)
+SECRET_KEY          = os.getenv("SECRET_KEY", "dev-secret-change-in-production")
+GOOGLE_CLIENT_ID    = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+APP_URL             = os.getenv("APP_URL", "http://localhost:8000")

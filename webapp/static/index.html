@@ -66,36 +66,35 @@ header {
 .voter-name-btn:hover { border-color: #7b68ee; }
 .voter-name-btn .chevron { font-size: 10px; color: #44447a; }
 
-/* ── Who are you overlay ── */
+/* ── Auth overlay ── */
 .voter-overlay {
   position: fixed; inset: 0; z-index: 999;
-  background: rgba(7, 7, 14, 0.92);
-  backdrop-filter: blur(6px);
+  background: rgba(7, 7, 14, 0.95);
+  backdrop-filter: blur(8px);
   display: flex; align-items: center; justify-content: center;
 }
 .voter-overlay.hidden { display: none; }
 .voter-modal {
   background: #13131a; border: 1px solid #2a2a40;
-  border-radius: 18px; padding: 40px 48px;
-  display: flex; flex-direction: column; align-items: center; gap: 28px;
-  min-width: 340px;
+  border-radius: 18px; padding: 48px 52px;
+  display: flex; flex-direction: column; align-items: center; gap: 24px;
+  min-width: 360px; text-align: center;
 }
-.voter-modal h2 {
-  font-size: 22px; font-weight: 700; color: #fff; letter-spacing: -0.4px;
+.voter-modal .modal-logo { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.4px; }
+.voter-modal .modal-logo span { color: #7b68ee; }
+.voter-modal h2 { font-size: 20px; font-weight: 700; color: #fff; }
+.voter-modal p { font-size: 13px; color: #44447a; line-height: 1.5; }
+.voter-modal .error-msg { font-size: 12px; color: #eb6060; background: #2c1111; border: 1px solid #5c1f1f; border-radius: 8px; padding: 10px 14px; width: 100%; }
+
+.google-btn {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  width: 100%; padding: 13px 20px;
+  background: #fff; border: none; border-radius: 12px;
+  color: #111; font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: background 0.12s, transform 0.1s;
 }
-.voter-modal p { font-size: 13px; color: #44447a; margin-top: -16px; }
-.voter-names {
-  display: flex; flex-direction: column; gap: 10px; width: 100%;
-}
-.voter-pick-btn {
-  width: 100%; padding: 14px 20px;
-  background: #1c1c28; border: 1px solid #2e2e42;
-  border-radius: 12px; color: #dddde8;
-  font-size: 16px; font-weight: 600; cursor: pointer;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
-  text-align: left;
-}
-.voter-pick-btn:hover { background: #252535; border-color: #7b68ee; color: #fff; }
+.google-btn:hover { background: #f0f0f0; transform: translateY(-1px); }
+.google-btn svg { flex-shrink: 0; }
 
 /* ── Sub-filters (Queue tab only) ── */
 .subfilters {
@@ -238,19 +237,26 @@ main { max-width: 1280px; margin: 0 auto; padding: 16px 24px 40px; }
   </div>
   <div class="voter-wrap">
     <span class="voter-label">Voting as</span>
-    <button class="voter-name-btn" id="voterNameBtn" onclick="showVoterOverlay()">
-      <span id="voterNameLabel">—</span>
-      <span class="chevron">▼</span>
+    <button class="voter-name-btn" id="voterNameBtn">
+      <span id="voterNameLabel">…</span>
     </button>
+    <a href="/auth/logout" id="logoutLink" style="display:none;font-size:11px;color:#33335a;text-decoration:none;margin-left:4px;">sign out</a>
   </div>
 </header>
 
-<!-- Who are you? overlay -->
+<!-- Auth overlay -->
 <div class="voter-overlay" id="voterOverlay">
   <div class="voter-modal">
-    <h2>Who are you?</h2>
-    <p>Select your name to start voting</p>
-    <div class="voter-names" id="voterNames"></div>
+    <div class="modal-logo">IOSG <span>Radar</span></div>
+    <h2>Sign in to vote</h2>
+    <p>Use your <strong>@iosg.vc</strong> Google account.<br>You'll only need to do this once.</p>
+    <div id="authError" style="display:none" class="error-msg"></div>
+    <a href="/auth/login" style="width:100%;text-decoration:none">
+      <button class="google-btn">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continue with Google
+      </button>
+    </a>
   </div>
 </div>
 
@@ -274,43 +280,43 @@ let currentVoter = '';
 let currentTab = 'queue';   // queue | survived | all
 let currentSub = 'all';     // all | unvoted | up | down
 
-// ── Voter overlay ──────────────────────────────────────────────────────────
-function showVoterOverlay() {
-  document.getElementById('voterOverlay').classList.remove('hidden');
-}
-
-function selectVoter(name) {
-  currentVoter = name;
-  document.getElementById('voterNameLabel').textContent = name;
-  document.getElementById('voterOverlay').classList.add('hidden');
-  render();
-}
-
 // ── Bootstrap ──────────────────────────────────────────────────────────────
 (async () => {
+  // Show auth error if redirected back with ?auth_error=
+  const params = new URLSearchParams(location.search);
+  if (params.has('auth_error')) {
+    const errEl = document.getElementById('authError');
+    const msgs = {
+      not_in_team: `This email (${params.get('email') || '?'}) isn't in the team list.`,
+      cancelled: 'Sign-in was cancelled.',
+      token_exchange_failed: 'Google sign-in failed. Please try again.',
+      userinfo_failed: 'Could not fetch your Google account info. Please try again.',
+    };
+    errEl.textContent = msgs[params.get('auth_error')] || 'Sign-in failed. Please try again.';
+    errEl.style.display = 'block';
+    history.replaceState({}, '', '/'); // clean up URL
+  }
+
   try {
-    const [cfg, projs] = await Promise.all([
-      fetch('/api/config').then(r => r.json()),
+    const [me, projs] = await Promise.all([
+      fetch('/api/me').then(r => r.json()),
       fetch('/api/projects').then(r => r.json()),
     ]);
 
-    // Build overlay buttons
-    const container = document.getElementById('voterNames');
-    cfg.team_members.forEach(m => {
-      const btn = document.createElement('button');
-      btn.className = 'voter-pick-btn';
-      btn.textContent = m;
-      btn.onclick = () => selectVoter(m);
-      container.appendChild(btn);
-    });
+    if (me.voter) {
+      // Already authenticated via cookie
+      currentVoter = me.voter;
+      document.getElementById('voterNameLabel').textContent = me.voter;
+      document.getElementById('logoutLink').style.display = 'inline';
+      document.getElementById('voterOverlay').classList.add('hidden');
+    }
+    // else overlay stays visible showing the Google sign-in button
 
     projects = projs;
-    render(); // render cards (vote buttons will be inert until voter is picked)
-    // overlay stays visible until a name is picked
+    render();
   } catch (err) {
     document.getElementById('grid').innerHTML =
       `<div class="state-msg">Failed to load: ${esc(String(err))}</div>`;
-    document.getElementById('voterOverlay').classList.add('hidden');
   }
 })();
 
@@ -468,7 +474,7 @@ async function submitVote(notionId, vote) {
     const res = await fetch('/api/vote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notion_id: notionId, voter_name: currentVoter, vote }),
+      body: JSON.stringify({ notion_id: notionId, vote }),
     });
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
