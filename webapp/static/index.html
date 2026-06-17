@@ -50,18 +50,52 @@ header {
 }
 .tab.active .badge { background: #2e2b55; color: #a89fee; }
 
-/* ── Voter picker ── */
+/* ── Voter picker (header) ── */
 .voter-wrap {
   margin-left: auto; display: flex; align-items: center; gap: 8px;
   padding: 10px 0;
 }
 .voter-label { font-size: 12px; color: #44447a; white-space: nowrap; }
-select {
+.voter-name-btn {
   background: #1c1c28; border: 1px solid #2e2e42;
   border-radius: 8px; color: #dddde8;
-  padding: 6px 10px; font-size: 13px; cursor: pointer; outline: none;
+  padding: 6px 12px; font-size: 13px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: border-color 0.12s;
 }
-select:focus { border-color: #7b68ee; }
+.voter-name-btn:hover { border-color: #7b68ee; }
+.voter-name-btn .chevron { font-size: 10px; color: #44447a; }
+
+/* ── Who are you overlay ── */
+.voter-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(7, 7, 14, 0.92);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+}
+.voter-overlay.hidden { display: none; }
+.voter-modal {
+  background: #13131a; border: 1px solid #2a2a40;
+  border-radius: 18px; padding: 40px 48px;
+  display: flex; flex-direction: column; align-items: center; gap: 28px;
+  min-width: 340px;
+}
+.voter-modal h2 {
+  font-size: 22px; font-weight: 700; color: #fff; letter-spacing: -0.4px;
+}
+.voter-modal p { font-size: 13px; color: #44447a; margin-top: -16px; }
+.voter-names {
+  display: flex; flex-direction: column; gap: 10px; width: 100%;
+}
+.voter-pick-btn {
+  width: 100%; padding: 14px 20px;
+  background: #1c1c28; border: 1px solid #2e2e42;
+  border-radius: 12px; color: #dddde8;
+  font-size: 16px; font-weight: 600; cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  text-align: left;
+}
+.voter-pick-btn:hover { background: #252535; border-color: #7b68ee; color: #fff; }
 
 /* ── Sub-filters (Queue tab only) ── */
 .subfilters {
@@ -162,6 +196,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 16px 24px 40px; }
 .vote-btn:hover { border-color: #44445a; color: #dddde8; }
 .vote-btn.up.active  { background: #112618; border-color: #1f5c34; color: #4ebb77; }
 .vote-btn.down.active { background: #2c1111; border-color: #5c1f1f; color: #eb6060; }
+.vote-btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
 .vote-btn .count { font-weight: 700; min-width: 14px; text-align: center; }
 
 .voter-avatars { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; max-width: 160px; }
@@ -203,9 +238,21 @@ main { max-width: 1280px; margin: 0 auto; padding: 16px 24px 40px; }
   </div>
   <div class="voter-wrap">
     <span class="voter-label">Voting as</span>
-    <select id="voterSelect"></select>
+    <button class="voter-name-btn" id="voterNameBtn" onclick="showVoterOverlay()">
+      <span id="voterNameLabel">—</span>
+      <span class="chevron">▼</span>
+    </button>
   </div>
 </header>
+
+<!-- Who are you? overlay -->
+<div class="voter-overlay" id="voterOverlay">
+  <div class="voter-modal">
+    <h2>Who are you?</h2>
+    <p>Select your name to start voting</p>
+    <div class="voter-names" id="voterNames"></div>
+  </div>
+</div>
 
 <div id="subfilterBar" class="subfilters">
   <button class="sub-btn active" data-sub="all">All</button>
@@ -227,6 +274,18 @@ let currentVoter = '';
 let currentTab = 'queue';   // queue | survived | all
 let currentSub = 'all';     // all | unvoted | up | down
 
+// ── Voter overlay ──────────────────────────────────────────────────────────
+function showVoterOverlay() {
+  document.getElementById('voterOverlay').classList.remove('hidden');
+}
+
+function selectVoter(name) {
+  currentVoter = name;
+  document.getElementById('voterNameLabel').textContent = name;
+  document.getElementById('voterOverlay').classList.add('hidden');
+  render();
+}
+
 // ── Bootstrap ──────────────────────────────────────────────────────────────
 (async () => {
   try {
@@ -235,20 +294,23 @@ let currentSub = 'all';     // all | unvoted | up | down
       fetch('/api/projects').then(r => r.json()),
     ]);
 
-    const sel = document.getElementById('voterSelect');
+    // Build overlay buttons
+    const container = document.getElementById('voterNames');
     cfg.team_members.forEach(m => {
-      const opt = document.createElement('option');
-      opt.value = m; opt.textContent = m;
-      sel.appendChild(opt);
+      const btn = document.createElement('button');
+      btn.className = 'voter-pick-btn';
+      btn.textContent = m;
+      btn.onclick = () => selectVoter(m);
+      container.appendChild(btn);
     });
-    currentVoter = cfg.team_members[0] || '';
-    sel.addEventListener('change', e => { currentVoter = e.target.value; render(); });
 
     projects = projs;
-    render();
+    render(); // render cards (vote buttons will be inert until voter is picked)
+    // overlay stays visible until a name is picked
   } catch (err) {
     document.getElementById('grid').innerHTML =
       `<div class="state-msg">Failed to load: ${esc(String(err))}</div>`;
+    document.getElementById('voterOverlay').classList.add('hidden');
   }
 })();
 
@@ -376,10 +438,10 @@ function cardHTML(p) {
   ${(sectors || stageTags) ? `<div class="tags">${sectors}${stageTags}</div>` : ''}
   ${watcherText}
   <div class="vote-section">
-    <button class="vote-btn up ${vote === 'up' ? 'active' : ''}" data-vote="up">
+    <button class="vote-btn up ${vote === 'up' ? 'active' : ''}" data-vote="up" ${!currentVoter ? 'disabled' : ''}>
       👍 <span class="count">${p.vote_up || 0}</span>
     </button>
-    <button class="vote-btn down ${vote === 'down' ? 'active' : ''}" data-vote="down">
+    <button class="vote-btn down ${vote === 'down' ? 'active' : ''}" data-vote="down" ${!currentVoter ? 'disabled' : ''}>
       👎 <span class="count">${p.vote_down || 0}</span>
     </button>
     ${voterChips ? `<div class="voter-avatars">${voterChips}</div>` : ''}
