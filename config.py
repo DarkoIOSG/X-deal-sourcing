@@ -18,3 +18,6 @@ SORSA_BASE_URL = "https://api.sorsa.io/v3"
 WATCHLIST_FILE = "followed_accounts.txt"
 DB_PATH = "state.db"
 MIN_WATCHERS = 1  # minimum watchlist members that must follow an account to surface it
+
+# Team members shown in the voting webapp voter dropdown — edit to match your team
+TEAM_MEMBERS = ["Jocy", "Momir", "Yiping", "Frank", "Mario"]

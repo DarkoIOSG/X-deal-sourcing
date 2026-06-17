@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IOSG Deal Radar</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0d0d12;
+  color: #dddde8;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: #13131a;
+  border-bottom: 1px solid #22222e;
+  padding: 0 24px;
+  display: flex; align-items: stretch; gap: 0;
+}
+
+.logo {
+  font-size: 14px; font-weight: 700; color: #fff; letter-spacing: -0.3px;
+  white-space: nowrap; padding: 14px 20px 14px 0; margin-right: 8px;
+  border-right: 1px solid #22222e;
+  align-self: center;
+}
+.logo span { color: #7b68ee; }
+
+/* ── Tab nav ── */
+.tabs { display: flex; align-items: stretch; gap: 0; }
+.tab {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 18px;
+  font-size: 13px; font-weight: 500; color: #55558a;
+  cursor: pointer; border-bottom: 2px solid transparent;
+  transition: color 0.12s, border-color 0.12s;
+  white-space: nowrap; height: 48px;
+  background: none; border-top: none; border-left: none; border-right: none;
+}
+.tab:hover { color: #aaaacc; }
+.tab.active { color: #dddde8; border-bottom-color: #7b68ee; }
+.tab .badge {
+  background: #22223a; border-radius: 10px; padding: 1px 7px;
+  font-size: 11px; color: #7777aa;
+}
+.tab.active .badge { background: #2e2b55; color: #a89fee; }
+
+/* ── Voter picker ── */
+.voter-wrap {
+  margin-left: auto; display: flex; align-items: center; gap: 8px;
+  padding: 10px 0;
+}
+.voter-label { font-size: 12px; color: #44447a; white-space: nowrap; }
+select {
+  background: #1c1c28; border: 1px solid #2e2e42;
+  border-radius: 8px; color: #dddde8;
+  padding: 6px 10px; font-size: 13px; cursor: pointer; outline: none;
+}
+select:focus { border-color: #7b68ee; }
+
+/* ── Sub-filters (Queue tab only) ── */
+.subfilters {
+  display: flex; gap: 6px;
+  padding: 14px 24px 0;
+  max-width: 1280px; margin: 0 auto;
+}
+.sub-btn {
+  background: #1c1c28; border: 1px solid #2e2e42;
+  border-radius: 7px; color: #55558a;
+  padding: 5px 12px; font-size: 12px; cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.sub-btn:hover { color: #aaaacc; border-color: #44445a; }
+.sub-btn.active { background: #2a2845; border-color: #5a52a0; color: #c0b8f8; }
+
+/* ── Main ── */
+main { max-width: 1280px; margin: 0 auto; padding: 16px 24px 40px; }
+
+.summary { font-size: 12px; color: #33336a; margin-bottom: 18px; }
+
+/* ── Grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 14px;
+}
+
+/* ── Card ── */
+.card {
+  background: #13131a; border: 1px solid #22222e;
+  border-radius: 12px; padding: 18px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: border-color 0.15s;
+  position: relative;
+}
+.card:hover { border-color: #36364e; }
+.card.reviewed { opacity: 0.7; }
+
+.reviewed-badge {
+  position: absolute; top: 12px; right: 12px;
+  background: #1c1c28; border: 1px solid #2e2e42;
+  border-radius: 5px; padding: 2px 7px;
+  font-size: 10px; color: #44447a; letter-spacing: 0.4px;
+}
+
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.card-name { font-size: 15px; font-weight: 600; color: #fff; padding-right: 60px; }
+.card-name a { color: inherit; text-decoration: none; }
+.card-name a:hover { color: #7b68ee; }
+.card-sub { display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
+.card-username { font-size: 11px; color: #44447a; }
+
+.score-badge {
+  flex-shrink: 0; border-radius: 7px; padding: 4px 9px;
+  font-size: 12px; font-weight: 700;
+  background: #1c1c28; border: 1px solid #2e2e42; color: #aaaacc;
+  position: absolute; top: 18px; right: 18px;
+}
+.score-badge.high { background: #112618; border-color: #1f5c34; color: #4ebb77; }
+.score-badge.med  { background: #221c0c; border-color: #5c450f; color: #d4a336; }
+
+/* when reviewed badge is shown, push score badge down */
+.card.reviewed .score-badge { top: 36px; }
+
+.rec-badge {
+  display: inline-block; padding: 2px 7px; border-radius: 4px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+}
+.rec-badge.deep_dive { background: #111d3e; color: #5888e0; }
+.rec-badge.watch     { background: #112618; color: #4ebb77; }
+
+.card-one-liner { font-size: 12px; color: #7777a0; line-height: 1.55; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag {
+  background: #1c1c28; border: 1px solid #28283c;
+  border-radius: 4px; padding: 2px 7px;
+  font-size: 10px; color: #5a5a88;
+}
+
+.watchers-row { font-size: 11px; color: #33335a; }
+
+/* ── Vote bar ── */
+.vote-section {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: auto; padding-top: 12px;
+  border-top: 1px solid #1c1c28;
+}
+.vote-btn {
+  display: flex; align-items: center; gap: 5px;
+  background: #1c1c28; border: 1px solid #2e2e42;
+  border-radius: 8px; padding: 7px 13px;
+  font-size: 13px; cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  color: #55558a;
+}
+.vote-btn:hover { border-color: #44445a; color: #dddde8; }
+.vote-btn.up.active  { background: #112618; border-color: #1f5c34; color: #4ebb77; }
+.vote-btn.down.active { background: #2c1111; border-color: #5c1f1f; color: #eb6060; }
+.vote-btn .count { font-weight: 700; min-width: 14px; text-align: center; }
+
+.voter-avatars { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; max-width: 160px; }
+.voter-chip {
+  font-size: 10px; padding: 2px 6px; border-radius: 4px;
+  background: #1c1c28; color: #44447a;
+}
+.voter-chip.up   { background: #112618; color: #4ebb77; }
+.voter-chip.down { background: #2c1111; color: #eb6060; }
+
+/* ── Survived tab header ── */
+.survived-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  background: #112618; border: 1px solid #1f5c34; border-radius: 10px;
+  font-size: 12px; color: #4ebb77;
+}
+
+/* ── Empty / loading states ── */
+.state-msg { grid-column: 1/-1; text-align: center; padding: 80px 20px; color: #33336a; font-size: 13px; }
+.spinner {
+  width: 22px; height: 22px;
+  border: 2px solid #22223a; border-top-color: #7b68ee;
+  border-radius: 50%; animation: spin 0.75s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">IOSG <span>Radar</span></div>
+  <div class="tabs">
+    <button class="tab active" data-tab="queue">Queue <span class="badge" id="badge-queue">—</span></button>
+    <button class="tab" data-tab="survived">Survived <span class="badge" id="badge-survived">—</span></button>
+    <button class="tab" data-tab="all">All <span class="badge" id="badge-all">—</span></button>
+  </div>
+  <div class="voter-wrap">
+    <span class="voter-label">Voting as</span>
+    <select id="voterSelect"></select>
+  </div>
+</header>
+
+<div id="subfilterBar" class="subfilters">
+  <button class="sub-btn active" data-sub="all">All</button>
+  <button class="sub-btn" data-sub="unvoted">Not voted</button>
+  <button class="sub-btn" data-sub="up">Voted up</button>
+  <button class="sub-btn" data-sub="down">Voted down</button>
+</div>
+
+<main>
+  <div class="summary" id="summary"></div>
+  <div class="grid" id="grid">
+    <div class="state-msg"><div class="spinner"></div>Loading projects…</div>
+  </div>
+</main>
+
+<script>
+let projects = [];
+let currentVoter = '';
+let currentTab = 'queue';   // queue | survived | all
+let currentSub = 'all';     // all | unvoted | up | down
+
+// ── Bootstrap ──────────────────────────────────────────────────────────────
+(async () => {
+  try {
+    const [cfg, projs] = await Promise.all([
+      fetch('/api/config').then(r => r.json()),
+      fetch('/api/projects').then(r => r.json()),
+    ]);
+
+    const sel = document.getElementById('voterSelect');
+    cfg.team_members.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m; opt.textContent = m;
+      sel.appendChild(opt);
+    });
+    currentVoter = cfg.team_members[0] || '';
+    sel.addEventListener('change', e => { currentVoter = e.target.value; render(); });
+
+    projects = projs;
+    render();
+  } catch (err) {
+    document.getElementById('grid').innerHTML =
+      `<div class="state-msg">Failed to load: ${esc(String(err))}</div>`;
+  }
+})();
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTab = btn.dataset.tab;
+    document.getElementById('subfilterBar').style.display = currentTab === 'queue' ? 'flex' : 'none';
+    render();
+  });
+});
+
+// ── Sub-filters ────────────────────────────────────────────────────────────
+document.querySelectorAll('.sub-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentSub = btn.dataset.sub;
+    render();
+  });
+});
+
+// ── Data helpers ───────────────────────────────────────────────────────────
+function myVote(p) { return (p.voters || {})[currentVoter] || null; }
+
+function queueProjects()    { return projects.filter(p => !p.vote_reviewed); }
+function survivedProjects() { return projects.filter(p => (p.vote_up || 0) >= 1); }
+
+function applySubFilter(list) {
+  if (currentSub === 'unvoted') return list.filter(p => !myVote(p));
+  if (currentSub === 'up')      return list.filter(p => myVote(p) === 'up');
+  if (currentSub === 'down')    return list.filter(p => myVote(p) === 'down');
+  return list;
+}
+
+function visibleProjects() {
+  if (currentTab === 'queue')    return applySubFilter(queueProjects());
+  if (currentTab === 'survived') return survivedProjects().sort((a, b) => (b.vote_up || 0) - (a.vote_up || 0) || (b.score || 0) - (a.score || 0));
+  return projects; // all
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function render() {
+  const list = visibleProjects();
+  const queue = queueProjects();
+  const survived = survivedProjects();
+
+  // Update tab badges
+  document.getElementById('badge-queue').textContent    = queue.length;
+  document.getElementById('badge-survived').textContent = survived.length;
+  document.getElementById('badge-all').textContent      = projects.length;
+
+  // Summary line
+  const qVoted = queue.filter(p => myVote(p)).length;
+  const summaryEl = document.getElementById('summary');
+  if (currentTab === 'queue') {
+    summaryEl.textContent = `${queue.length} in queue · ${qVoted} voted · ${queue.length - qVoted} remaining`;
+  } else if (currentTab === 'survived') {
+    summaryEl.textContent = `${survived.length} project${survived.length !== 1 ? 's' : ''} with at least one 👍`;
+  } else {
+    summaryEl.textContent = `${projects.length} total · ${projects.filter(p => p.vote_reviewed).length} reviewed`;
+  }
+
+  const grid = document.getElementById('grid');
+
+  if (!list.length) {
+    const msgs = {
+      queue: 'No projects in the queue.',
+      survived: 'No projects have received a thumbs up yet.',
+      all: 'No projects found.',
+    };
+    grid.innerHTML = `<div class="state-msg">${msgs[currentTab]}</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p => cardHTML(p)).join('');
+
+  grid.querySelectorAll('.vote-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const notionId = btn.closest('.card').dataset.id;
+      await submitVote(notionId, btn.dataset.vote);
+    });
+  });
+}
+
+function cardHTML(p) {
+  const vote    = myVote(p);
+  const score   = p.score || 0;
+  const scoreClass = score >= 70 ? 'high' : score >= 50 ? 'med' : '';
+  const recClass   = p.recommendation === 'deep_dive' ? 'deep_dive' : 'watch';
+  const recLabel   = p.recommendation === 'deep_dive' ? 'Deep Dive' : 'Watch';
+  const xUrl = p.x_profile || (p.username ? `https://x.com/${p.username}` : '#');
+
+  const sectors  = (p.sectors || []).map(s => `<span class="tag">${esc(s)}</span>`).join('');
+  const stageTags = [p.stage].filter(Boolean).map(s => `<span class="tag">${esc(s)}</span>`).join('');
+
+  const voterChips = Object.entries(p.voters || {})
+    .map(([name, v]) => `<span class="voter-chip ${v}">${esc(name)}</span>`)
+    .join('');
+
+  const watcherText = (p.watcher_count > 0)
+    ? `<div class="watchers-row">${p.watcher_count} watcher${p.watcher_count !== 1 ? 's' : ''}</div>`
+    : '';
+
+  const reviewedBadge = p.vote_reviewed
+    ? `<div class="reviewed-badge">reviewed</div>`
+    : '';
+
+  return `
+<div class="card${p.vote_reviewed ? ' reviewed' : ''}" data-id="${esc(p.notion_id)}">
+  ${reviewedBadge}
+  ${score ? `<div class="score-badge ${scoreClass}">${Math.round(score)}</div>` : ''}
+  <div class="card-top">
+    <div>
+      <div class="card-name"><a href="${esc(xUrl)}" target="_blank" rel="noopener">${esc(p.name || p.username)}</a></div>
+      <div class="card-sub">
+        <span class="card-username">@${esc(p.username)}</span>
+        <span class="rec-badge ${recClass}">${recLabel}</span>
+      </div>
+    </div>
+  </div>
+  ${p.one_liner ? `<div class="card-one-liner">${esc(p.one_liner)}</div>` : ''}
+  ${(sectors || stageTags) ? `<div class="tags">${sectors}${stageTags}</div>` : ''}
+  ${watcherText}
+  <div class="vote-section">
+    <button class="vote-btn up ${vote === 'up' ? 'active' : ''}" data-vote="up">
+      👍 <span class="count">${p.vote_up || 0}</span>
+    </button>
+    <button class="vote-btn down ${vote === 'down' ? 'active' : ''}" data-vote="down">
+      👎 <span class="count">${p.vote_down || 0}</span>
+    </button>
+    ${voterChips ? `<div class="voter-avatars">${voterChips}</div>` : ''}
+  </div>
+</div>`;
+}
+
+// ── Vote submission ────────────────────────────────────────────────────────
+async function submitVote(notionId, vote) {
+  if (!currentVoter) return;
+  const project = projects.find(p => p.notion_id === notionId);
+  if (!project) return;
+
+  const prevVote = (project.voters || {})[currentVoter];
+  if (prevVote === vote) return; // already voted this way
+
+  // Optimistic update
+  if (prevVote) project[`vote_${prevVote}`] = Math.max(0, (project[`vote_${prevVote}`] || 0) - 1);
+  project.voters = { ...(project.voters || {}), [currentVoter]: vote };
+  project[`vote_${vote}`] = (project[`vote_${vote}`] || 0) + 1;
+  render();
+
+  try {
+    const res = await fetch('/api/vote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notion_id: notionId, voter_name: currentVoter, vote }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+
+    // Sync with server truth
+    const proj = projects.find(p => p.notion_id === notionId);
+    if (proj) {
+      proj.vote_up      = data.vote_up;
+      proj.vote_down    = data.vote_down;
+      proj.voters       = data.voters;
+      if (data.reviewed) proj.vote_reviewed = true;
+    }
+    render();
+  } catch (err) {
+    // Roll back optimistic update
+    if (prevVote) {
+      project.voters[currentVoter]  = prevVote;
+      project[`vote_${vote}`]       = Math.max(0, (project[`vote_${vote}`] || 0) - 1);
+      project[`vote_${prevVote}`]   = (project[`vote_${prevVote}`] || 0) + 1;
+    } else {
+      delete project.voters[currentVoter];
+      project[`vote_${vote}`] = Math.max(0, (project[`vote_${vote}`] || 0) - 1);
+    }
+    render();
+    console.error('Vote failed:', err);
+  }
+}
+
+function esc(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>

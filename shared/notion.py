@@ -68,6 +68,12 @@ PROP_IC_DECISION    = "IC_Decision"
 PROP_IC_WHY         = "IC_Why"
 PROP_IC_DATE        = "IC_Date"
 
+# Team voting (written by webapp)
+PROP_VOTE_UP        = "Vote_Up"
+PROP_VOTE_DOWN      = "Vote_Down"
+PROP_VOTERS         = "Voters"
+PROP_VOTE_REVIEWED  = "Vote_Reviewed"
+
 # ── Property type map (used by update_row) ────────────────────────────────────
 _FIELD_TYPES: dict[str, str] = {
     PROP_NAME:           "title",
@@ -103,6 +109,10 @@ _FIELD_TYPES: dict[str, str] = {
     PROP_AUDIT_FLAG:          "select",
     PROP_IC_DECISION:         "select",
     PROP_SECTOR:         "multi_select",
+    PROP_VOTE_UP:               "number",
+    PROP_VOTE_DOWN:             "number",
+    PROP_VOTERS:                "rich_text",
+    PROP_VOTE_REVIEWED:         "checkbox",
     PROP_CHECKED_ON_SURF:       "checkbox",
     PROP_RAISED:                "checkbox",
     PROP_LAST_ROUND_DATE:       "date",
@@ -192,6 +202,11 @@ def _parse_page(page: dict) -> dict:
         score_json = json.loads(score_json_raw) if score_json_raw else {}
     except json.JSONDecodeError:
         score_json = {}
+    voters_raw = _read(props, PROP_VOTERS)
+    try:
+        voters = json.loads(voters_raw) if voters_raw else {}
+    except (json.JSONDecodeError, ValueError):
+        voters = {}
     return {
         "notion_id":      page["id"],
         "account_id":     str(int(float(raw_id))) if raw_id else "",
@@ -216,6 +231,14 @@ def _parse_page(page: dict) -> dict:
         "last_round_amount":    _read(props, PROP_LAST_ROUND_AMOUNT),
         "last_round_valuation": _read(props, PROP_LAST_ROUND_VALUATION),
         "investors":            _read(props, PROP_INVESTORS),
+        "watcher_count":        _read(props, PROP_WATCHER_COUNT),
+        "watchers":             _read(props, PROP_WATCHERS),
+        "x_profile":            _read(props, PROP_X_PROFILE),
+        "processed_at":         _read(props, PROP_PROCESSED_AT),
+        "vote_reviewed":        _read(props, PROP_VOTE_REVIEWED),
+        "vote_up":              _read(props, PROP_VOTE_UP) or 0,
+        "vote_down":            _read(props, PROP_VOTE_DOWN) or 0,
+        "voters":               voters,
     }
 
 
@@ -246,6 +269,50 @@ def query_candidates(status: str = "Scored",
             break
         cursor = data.get("next_cursor")
     return pages
+
+
+def query_voting_projects() -> list[dict]:
+    """Return all Scored watch/deep_dive projects for the voting webapp (one query)."""
+    payload = {
+        "filter": {
+            "and": [
+                {"property": PROP_STATUS, "select": {"equals": "Scored"}},
+                {"or": [
+                    {"property": PROP_RECOMMENDATION, "select": {"equals": "watch"}},
+                    {"property": PROP_RECOMMENDATION, "select": {"equals": "deep_dive"}},
+                ]},
+            ]
+        },
+        "sorts": [{"property": PROP_SCORE, "direction": "descending"}],
+    }
+    pages: list[dict] = []
+    cursor = None
+    while True:
+        if cursor:
+            payload["start_cursor"] = cursor
+        r = requests.post(_DB_URL, headers=_HEADERS, json=payload, timeout=30)
+        r.raise_for_status()
+        data = r.json()
+        pages.extend(_parse_page(p) for p in data.get("results", []))
+        if not data.get("has_more"):
+            break
+        cursor = data.get("next_cursor")
+    return pages
+
+
+def flag_reviewed(notion_id: str):
+    """Mark a project as reviewed (voting cycle complete)."""
+    update_row(notion_id, {PROP_VOTE_REVIEWED: True})
+
+
+def sync_votes(notion_id: str, up: int, down: int, voters: dict):
+    """Write aggregate vote counts back to a Notion page."""
+    import json
+    update_row(notion_id, {
+        PROP_VOTE_UP:   up,
+        PROP_VOTE_DOWN: down,
+        PROP_VOTERS:    json.dumps(voters, ensure_ascii=False),
+    })
 
 
 def get_project(notion_id: str) -> dict:
