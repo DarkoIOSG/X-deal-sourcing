@@ -276,11 +276,9 @@ def query_voting_projects() -> list[dict]:
     payload = {
         "filter": {
             "and": [
-                {"property": PROP_STATUS, "select": {"equals": "Scored"}},
-                {"or": [
-                    {"property": PROP_RECOMMENDATION, "select": {"equals": "watch"}},
-                    {"property": PROP_RECOMMENDATION, "select": {"equals": "deep_dive"}},
-                ]},
+                {"property": PROP_STATUS, "select": {"equals": "Deep_Dived"}},
+                {"property": PROP_RECOMMENDATION, "select": {"equals": "watch"}},
+                {"property": PROP_VOTE_REVIEWED, "checkbox": {"equals": False}},
             ]
         },
         "sorts": [{"property": PROP_SCORE, "direction": "descending"}],
