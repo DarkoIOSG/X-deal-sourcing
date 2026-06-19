@@ -24,7 +24,7 @@ header {
 }
 
 .logo {
-  font-size: 14px; font-weight: 700; color: #fff; letter-spacing: -0.3px;
+  font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.3px;
   white-space: nowrap; padding: 14px 20px 14px 0; margin-right: 8px;
   border-right: 1px solid #22222e;
   align-self: center;
@@ -35,18 +35,18 @@ header {
 .tabs { display: flex; align-items: stretch; gap: 0; }
 .tab {
   display: flex; align-items: center; gap: 6px;
-  padding: 0 18px;
-  font-size: 13px; font-weight: 500; color: #55558a;
+  padding: 0 20px;
+  font-size: 15px; font-weight: 500; color: #55558a;
   cursor: pointer; border-bottom: 2px solid transparent;
   transition: color 0.12s, border-color 0.12s;
-  white-space: nowrap; height: 48px;
+  white-space: nowrap; height: 52px;
   background: none; border-top: none; border-left: none; border-right: none;
 }
 .tab:hover { color: #aaaacc; }
 .tab.active { color: #dddde8; border-bottom-color: #7b68ee; }
 .tab .badge {
-  background: #22223a; border-radius: 10px; padding: 1px 7px;
-  font-size: 11px; color: #7777aa;
+  background: #22223a; border-radius: 10px; padding: 2px 8px;
+  font-size: 13px; color: #7777aa;
 }
 .tab.active .badge { background: #2e2b55; color: #a89fee; }
 
@@ -55,11 +55,11 @@ header {
   margin-left: auto; display: flex; align-items: center; gap: 8px;
   padding: 10px 0;
 }
-.voter-label { font-size: 12px; color: #44447a; white-space: nowrap; }
+.voter-label { font-size: 13px; color: #44447a; white-space: nowrap; }
 .voter-name-btn {
   background: #1c1c28; border: 1px solid #2e2e42;
   border-radius: 8px; color: #dddde8;
-  padding: 6px 12px; font-size: 13px; font-weight: 600; cursor: pointer;
+  padding: 8px 14px; font-size: 14px; font-weight: 600; cursor: pointer;
   display: flex; align-items: center; gap: 6px;
   transition: border-color 0.12s;
 }
@@ -105,7 +105,7 @@ header {
 .sub-btn {
   background: #1c1c28; border: 1px solid #2e2e42;
   border-radius: 7px; color: #55558a;
-  padding: 5px 12px; font-size: 12px; cursor: pointer;
+  padding: 7px 14px; font-size: 13px; cursor: pointer;
   transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
 .sub-btn:hover { color: #aaaacc; border-color: #44445a; }
@@ -113,22 +113,22 @@ header {
 .filter-divider { width: 1px; background: #22222e; margin: 0 6px; align-self: stretch; }
 
 /* ── Main ── */
-main { max-width: 1280px; margin: 0 auto; padding: 16px 24px 40px; }
+main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 
-.summary { font-size: 12px; color: #33336a; margin-bottom: 18px; }
+.summary { font-size: 13px; color: #33336a; margin-bottom: 20px; }
 
 /* ── Grid ── */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 18px;
 }
 
 /* ── Card ── */
 .card {
   background: #13131a; border: 1px solid #22222e;
-  border-radius: 12px; padding: 18px;
-  display: flex; flex-direction: column; gap: 10px;
+  border-radius: 14px; padding: 22px;
+  display: flex; flex-direction: column; gap: 13px;
   transition: border-color 0.15s;
   position: relative;
 }
@@ -136,48 +136,46 @@ main { max-width: 1280px; margin: 0 auto; padding: 16px 24px 40px; }
 .card.reviewed { opacity: 0.7; }
 
 .reviewed-badge {
-  position: absolute; top: 12px; right: 12px;
+  position: absolute; top: 14px; right: 14px;
   background: #1c1c28; border: 1px solid #2e2e42;
-  border-radius: 5px; padding: 2px 7px;
-  font-size: 10px; color: #44447a; letter-spacing: 0.4px;
+  border-radius: 5px; padding: 3px 9px;
+  font-size: 12px; color: #44447a; letter-spacing: 0.4px;
 }
 
 .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-.card-name { font-size: 15px; font-weight: 600; color: #fff; padding-right: 60px; }
+.card-name { font-size: 18px; font-weight: 600; color: #fff; padding-right: 70px; }
 .card-name a { color: inherit; text-decoration: none; }
 .card-name a:hover { color: #7b68ee; }
-.card-sub { display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
-.card-username { font-size: 11px; color: #44447a; }
+.card-sub { display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+.card-username { font-size: 13px; color: #44447a; }
 
 .score-badge {
-  flex-shrink: 0; border-radius: 7px; padding: 4px 9px;
-  font-size: 12px; font-weight: 700;
+  flex-shrink: 0; border-radius: 8px; padding: 5px 11px;
+  font-size: 14px; font-weight: 700;
   background: #1c1c28; border: 1px solid #2e2e42; color: #aaaacc;
-  position: absolute; top: 18px; right: 18px;
+  position: absolute; top: 22px; right: 22px;
 }
 .score-badge.high { background: #112618; border-color: #1f5c34; color: #4ebb77; }
 .score-badge.med  { background: #221c0c; border-color: #5c450f; color: #d4a336; }
 
 /* when reviewed badge is shown, push score badge down */
-.card.reviewed .score-badge { top: 36px; }
+.card.reviewed .score-badge { top: 44px; }
 
 .rec-badge {
-  display: inline-block; padding: 2px 7px; border-radius: 4px;
-  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+  display: inline-block; padding: 3px 9px; border-radius: 4px;
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
 }
 .rec-badge.deep_dive { background: #111d3e; color: #5888e0; }
 .rec-badge.watch     { background: #112618; color: #4ebb77; }
 
-.card-one-liner { font-size: 12px; color: #7777a0; line-height: 1.55; }
+.card-one-liner { font-size: 14px; color: #7777a0; line-height: 1.6; }
 
-.tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag {
   background: #1c1c28; border: 1px solid #28283c;
-  border-radius: 4px; padding: 2px 7px;
-  font-size: 10px; color: #5a5a88;
+  border-radius: 5px; padding: 4px 10px;
+  font-size: 12px; color: #5a5a88;
 }
-
-.watchers-row { font-size: 11px; color: #33335a; }
 
 /* ── Vote bar ── */
 .vote-section {
@@ -186,10 +184,10 @@ main { max-width: 1280px; margin: 0 auto; padding: 16px 24px 40px; }
   border-top: 1px solid #1c1c28;
 }
 .vote-btn {
-  display: flex; align-items: center; gap: 5px;
+  display: flex; align-items: center; gap: 6px;
   background: #1c1c28; border: 1px solid #2e2e42;
-  border-radius: 8px; padding: 7px 13px;
-  font-size: 13px; cursor: pointer;
+  border-radius: 9px; padding: 9px 16px;
+  font-size: 15px; cursor: pointer;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
   color: #55558a;
 }
@@ -197,11 +195,11 @@ main { max-width: 1280px; margin: 0 auto; padding: 16px 24px 40px; }
 .vote-btn.up.active  { background: #112618; border-color: #1f5c34; color: #4ebb77; }
 .vote-btn.down.active { background: #2c1111; border-color: #5c1f1f; color: #eb6060; }
 .vote-btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
-.vote-btn .count { font-weight: 700; min-width: 14px; text-align: center; }
+.vote-btn .count { font-weight: 700; min-width: 16px; text-align: center; }
 
-.voter-avatars { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; max-width: 160px; }
+.voter-avatars { margin-left: auto; display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end; max-width: 180px; }
 .voter-chip {
-  font-size: 10px; padding: 2px 6px; border-radius: 4px;
+  font-size: 12px; padding: 3px 8px; border-radius: 5px;
   background: #1c1c28; color: #44447a;
 }
 .voter-chip.up   { background: #112618; color: #4ebb77; }
@@ -214,23 +212,23 @@ main { max-width: 1280px; margin: 0 auto; padding: 16px 24px 40px; }
 .memo-toggle {
   display: flex; align-items: center; gap: 6px;
   background: none; border: none; border-top: 1px solid #1c1c28;
-  padding: 10px 0 0; width: 100%;
-  font-size: 11px; color: #44447a; cursor: pointer;
+  padding: 12px 0 0; width: 100%;
+  font-size: 13px; color: #44447a; cursor: pointer;
   text-align: left; transition: color 0.12s;
 }
 .memo-toggle:hover { color: #7b68ee; }
 .memo-toggle .arrow { font-size: 9px; transition: transform 0.2s; display: inline-block; }
 .memo-toggle.open .arrow { transform: rotate(90deg); }
 .memo-body {
-  display: none; padding: 12px 0 0;
-  font-size: 12px; color: #8888b0; line-height: 1.75;
-  border-top: 1px solid #1c1c28; margin-top: 10px;
+  display: none; padding: 14px 0 0;
+  font-size: 14px; color: #8888b0; line-height: 1.75;
+  border-top: 1px solid #1c1c28; margin-top: 12px;
 }
 .memo-body.open { display: block; }
 .memo-body h3 {
-  font-size: 11px; font-weight: 700; color: #c0b8f8;
+  font-size: 12px; font-weight: 700; color: #c0b8f8;
   text-transform: uppercase; letter-spacing: 0.6px;
-  margin: 12px 0 5px;
+  margin: 14px 0 6px;
 }
 .memo-body h3:first-child { margin-top: 0; }
 .memo-body p { margin-bottom: 8px; }
@@ -476,10 +474,6 @@ function cardHTML(p) {
     .map(([name, v]) => `<span class="voter-chip ${v}">${esc(name)}</span>`)
     .join('');
 
-  const watcherText = (p.watcher_count > 0)
-    ? `<div class="watchers-row">${p.watcher_count} watcher${p.watcher_count !== 1 ? 's' : ''}</div>`
-    : '';
-
   const reviewedBadge = p.vote_reviewed
     ? `<div class="reviewed-badge">reviewed</div>`
     : '';
@@ -499,7 +493,6 @@ function cardHTML(p) {
   </div>
   ${p.one_liner ? `<div class="card-one-liner">${esc(p.one_liner)}</div>` : ''}
   ${(stageBadge || sectors) ? `<div class="tags">${stageBadge}${sectors}</div>` : ''}
-  ${watcherText}
   ${p.memo ? `
   <button class="memo-toggle" data-id="${esc(p.notion_id)}">
     <span class="arrow">▶</span> View memo
