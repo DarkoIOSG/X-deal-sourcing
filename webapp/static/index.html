@@ -4,87 +4,185 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IOSG Deal Radar</title>
+<script>
+  // Apply saved theme before first paint to avoid flash
+  (function(){ var t=localStorage.getItem('theme'); if(t==='dark') document.documentElement.dataset.theme='dark'; })();
+</script>
 <style>
+/* ── Theme variables ── */
+html {
+  --bg:              #f3f3f8;
+  --surface:         #ffffff;
+  --surface2:        #ededf5;
+  --border:          #e0e0ec;
+  --border2:         #d0d0e2;
+  --text:            #1a1a2e;
+  --text-logo:       #1a1a2e;
+  --text2:           #7070a8;
+  --text3:           #8888bb;
+  --text4:           #a0a0c8;
+  --accent:          #6b56e0;
+  --accent-bg:       #ede9ff;
+  --accent-border:   #9080d0;
+  --accent-text:     #4030a0;
+  --green-bg:        #e6f7ee;
+  --green-border:    #58b878;
+  --green-text:      #1a6a38;
+  --red-bg:          #fce8e8;
+  --red-border:      #cc7070;
+  --red-text:        #882020;
+  --yellow-bg:       #fdf3dc;
+  --yellow-border:   #c8a030;
+  --yellow-text:     #7a5808;
+  --stage-bg:        #eeebff;
+  --stage-border:    #b8a8e8;
+  --stage-text:      #5040a8;
+  --memo-text:       #5858a0;
+  --memo-strong:     #282860;
+  --memo-h3:         #6050b8;
+  --card-hover:      #c8c8de;
+  --overlay-bg:      rgba(180,180,210,0.88);
+  --spinner-track:   #d8d8ee;
+  --tag-bg:          #ededf5;
+  --tag-border:      #d8d8ec;
+  --tag-text:        #6060a0;
+  --badge-bg:        #e8e8f5;
+  --badge-text:      #8888bb;
+  --badge-active-bg: #e0dcff;
+  --badge-active-text:#4a38b0;
+}
+html[data-theme="dark"] {
+  --bg:              #0d0d12;
+  --surface:         #13131a;
+  --surface2:        #1c1c28;
+  --border:          #22222e;
+  --border2:         #2e2e42;
+  --text:            #dddde8;
+  --text-logo:       #ffffff;
+  --text2:           #55558a;
+  --text3:           #7777a0;
+  --text4:           #33336a;
+  --accent:          #7b68ee;
+  --accent-bg:       #2a2845;
+  --accent-border:   #5a52a0;
+  --accent-text:     #c0b8f8;
+  --green-bg:        #112618;
+  --green-border:    #1f5c34;
+  --green-text:      #4ebb77;
+  --red-bg:          #2c1111;
+  --red-border:      #5c1f1f;
+  --red-text:        #eb6060;
+  --yellow-bg:       #221c0c;
+  --yellow-border:   #5c450f;
+  --yellow-text:     #d4a336;
+  --stage-bg:        #1a1630;
+  --stage-border:    #352d60;
+  --stage-text:      #9b8ee8;
+  --memo-text:       #8888b0;
+  --memo-strong:     #c8c8e0;
+  --memo-h3:         #c0b8f8;
+  --card-hover:      #36364e;
+  --overlay-bg:      rgba(7,7,14,0.95);
+  --spinner-track:   #22223a;
+  --tag-bg:          #1c1c28;
+  --tag-border:      #28283c;
+  --tag-text:        #5a5a88;
+  --badge-bg:        #22223a;
+  --badge-text:      #7777aa;
+  --badge-active-bg: #2e2b55;
+  --badge-active-text:#a89fee;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #0d0d12;
-  color: #dddde8;
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
+  transition: background 0.2s, color 0.2s;
 }
 
 /* ── Header ── */
 header {
   position: sticky; top: 0; z-index: 100;
-  background: #13131a;
-  border-bottom: 1px solid #22222e;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
   padding: 0 24px;
   display: flex; align-items: stretch; gap: 0;
+  transition: background 0.2s, border-color 0.2s;
 }
 
 .logo {
-  font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.3px;
+  font-size: 16px; font-weight: 700; color: var(--text-logo); letter-spacing: -0.3px;
   white-space: nowrap; padding: 14px 20px 14px 0; margin-right: 8px;
-  border-right: 1px solid #22222e;
+  border-right: 1px solid var(--border);
   align-self: center;
 }
-.logo span { color: #7b68ee; }
+.logo span { color: var(--accent); }
 
 /* ── Tab nav ── */
 .tabs { display: flex; align-items: stretch; gap: 0; }
 .tab {
   display: flex; align-items: center; gap: 6px;
   padding: 0 20px;
-  font-size: 15px; font-weight: 500; color: #55558a;
+  font-size: 15px; font-weight: 500; color: var(--text2);
   cursor: pointer; border-bottom: 2px solid transparent;
   transition: color 0.12s, border-color 0.12s;
   white-space: nowrap; height: 52px;
   background: none; border-top: none; border-left: none; border-right: none;
 }
-.tab:hover { color: #aaaacc; }
-.tab.active { color: #dddde8; border-bottom-color: #7b68ee; }
+.tab:hover { color: var(--text3); }
+.tab.active { color: var(--text); border-bottom-color: var(--accent); }
 .tab .badge {
-  background: #22223a; border-radius: 10px; padding: 2px 8px;
-  font-size: 13px; color: #7777aa;
+  background: var(--badge-bg); border-radius: 10px; padding: 2px 8px;
+  font-size: 13px; color: var(--badge-text);
 }
-.tab.active .badge { background: #2e2b55; color: #a89fee; }
+.tab.active .badge { background: var(--badge-active-bg); color: var(--badge-active-text); }
 
 /* ── Voter picker (header) ── */
 .voter-wrap {
   margin-left: auto; display: flex; align-items: center; gap: 8px;
   padding: 10px 0;
 }
-.voter-label { font-size: 13px; color: #44447a; white-space: nowrap; }
+.voter-label { font-size: 13px; color: var(--text2); white-space: nowrap; }
 .voter-name-btn {
-  background: #1c1c28; border: 1px solid #2e2e42;
-  border-radius: 8px; color: #dddde8;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; color: var(--text);
   padding: 8px 14px; font-size: 14px; font-weight: 600; cursor: pointer;
   display: flex; align-items: center; gap: 6px;
-  transition: border-color 0.12s;
+  transition: border-color 0.12s, background 0.2s;
 }
-.voter-name-btn:hover { border-color: #7b68ee; }
-.voter-name-btn .chevron { font-size: 10px; color: #44447a; }
+.voter-name-btn:hover { border-color: var(--accent); }
+
+/* ── Theme toggle ── */
+.theme-btn {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; color: var(--text2);
+  padding: 8px 11px; font-size: 15px; cursor: pointer; line-height: 1;
+  transition: border-color 0.12s, background 0.2s, color 0.12s;
+}
+.theme-btn:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ── Auth overlay ── */
 .voter-overlay {
   position: fixed; inset: 0; z-index: 999;
-  background: rgba(7, 7, 14, 0.95);
+  background: var(--overlay-bg);
   backdrop-filter: blur(8px);
   display: flex; align-items: center; justify-content: center;
 }
 .voter-overlay.hidden { display: none; }
 .voter-modal {
-  background: #13131a; border: 1px solid #2a2a40;
+  background: var(--surface); border: 1px solid var(--border2);
   border-radius: 18px; padding: 48px 52px;
   display: flex; flex-direction: column; align-items: center; gap: 24px;
   min-width: 360px; text-align: center;
 }
-.voter-modal .modal-logo { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.4px; }
-.voter-modal .modal-logo span { color: #7b68ee; }
-.voter-modal h2 { font-size: 20px; font-weight: 700; color: #fff; }
-.voter-modal p { font-size: 13px; color: #44447a; line-height: 1.5; }
-.voter-modal .error-msg { font-size: 12px; color: #eb6060; background: #2c1111; border: 1px solid #5c1f1f; border-radius: 8px; padding: 10px 14px; width: 100%; }
+.voter-modal .modal-logo { font-size: 18px; font-weight: 800; color: var(--text-logo); letter-spacing: -0.4px; }
+.voter-modal .modal-logo span { color: var(--accent); }
+.voter-modal h2 { font-size: 20px; font-weight: 700; color: var(--text-logo); }
+.voter-modal p { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.voter-modal .error-msg { font-size: 12px; color: var(--red-text); background: var(--red-bg); border: 1px solid var(--red-border); border-radius: 8px; padding: 10px 14px; width: 100%; }
 
 .google-btn {
   display: flex; align-items: center; justify-content: center; gap: 12px;
@@ -96,26 +194,27 @@ header {
 .google-btn:hover { background: #f0f0f0; transform: translateY(-1px); }
 .google-btn svg { flex-shrink: 0; }
 
-/* ── Sub-filters (Queue tab only) ── */
+/* ── Sub-filters ── */
 .subfilters {
   display: flex; gap: 6px;
   padding: 14px 24px 0;
   max-width: 1280px; margin: 0 auto;
+  flex-wrap: wrap;
 }
 .sub-btn {
-  background: #1c1c28; border: 1px solid #2e2e42;
-  border-radius: 7px; color: #55558a;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 7px; color: var(--text2);
   padding: 7px 14px; font-size: 13px; cursor: pointer;
   transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
-.sub-btn:hover { color: #aaaacc; border-color: #44445a; }
-.sub-btn.active { background: #2a2845; border-color: #5a52a0; color: #c0b8f8; }
-.filter-divider { width: 1px; background: #22222e; margin: 0 6px; align-self: stretch; }
+.sub-btn:hover { color: var(--text); border-color: var(--accent-border); }
+.sub-btn.active { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent-text); }
+.filter-divider { width: 1px; background: var(--border); margin: 0 6px; align-self: stretch; }
 
 /* ── Main ── */
 main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 
-.summary { font-size: 13px; color: #33336a; margin-bottom: 20px; }
+.summary { font-size: 13px; color: var(--text4); margin-bottom: 20px; }
 
 /* ── Grid ── */
 .grid {
@@ -126,107 +225,99 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 
 /* ── Card ── */
 .card {
-  background: #13131a; border: 1px solid #22222e;
+  background: var(--surface); border: 1px solid var(--border);
   border-radius: 14px; padding: 22px;
   display: flex; flex-direction: column; gap: 13px;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, background 0.2s;
   position: relative;
 }
-.card:hover { border-color: #36364e; }
+.card:hover { border-color: var(--card-hover); }
 .card.reviewed { opacity: 0.7; }
 
 .reviewed-badge {
   position: absolute; top: 14px; right: 14px;
-  background: #1c1c28; border: 1px solid #2e2e42;
+  background: var(--surface2); border: 1px solid var(--border2);
   border-radius: 5px; padding: 3px 9px;
-  font-size: 12px; color: #44447a; letter-spacing: 0.4px;
+  font-size: 12px; color: var(--text2); letter-spacing: 0.4px;
 }
 
 .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-.card-name { font-size: 18px; font-weight: 600; color: #fff; padding-right: 70px; }
+.card-name { font-size: 18px; font-weight: 600; color: var(--text-logo); padding-right: 70px; }
 .card-name a { color: inherit; text-decoration: none; }
-.card-name a:hover { color: #7b68ee; }
+.card-name a:hover { color: var(--accent); }
 .card-sub { display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
-.card-username { font-size: 13px; color: #44447a; }
+.card-username { font-size: 13px; color: var(--text2); }
 
 .score-badge {
   flex-shrink: 0; border-radius: 8px; padding: 5px 11px;
   font-size: 14px; font-weight: 700;
-  background: #1c1c28; border: 1px solid #2e2e42; color: #aaaacc;
+  background: var(--surface2); border: 1px solid var(--border2); color: var(--text3);
   position: absolute; top: 22px; right: 22px;
 }
-.score-badge.high { background: #112618; border-color: #1f5c34; color: #4ebb77; }
-.score-badge.med  { background: #221c0c; border-color: #5c450f; color: #d4a336; }
+.score-badge.high { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+.score-badge.med  { background: var(--yellow-bg); border-color: var(--yellow-border); color: var(--yellow-text); }
 
-/* when reviewed badge is shown, push score badge down */
 .card.reviewed .score-badge { top: 44px; }
 
-.rec-badge {
-  display: inline-block; padding: 3px 9px; border-radius: 4px;
-  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
-}
-.rec-badge.deep_dive { background: #111d3e; color: #5888e0; }
-.rec-badge.watch     { background: #112618; color: #4ebb77; }
-
-.card-one-liner { font-size: 14px; color: #7777a0; line-height: 1.6; }
+.card-one-liner { font-size: 14px; color: var(--text3); line-height: 1.6; }
 
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag {
-  background: #1c1c28; border: 1px solid #28283c;
+  background: var(--tag-bg); border: 1px solid var(--tag-border);
   border-radius: 5px; padding: 4px 10px;
-  font-size: 12px; color: #5a5a88;
+  font-size: 12px; color: var(--tag-text);
 }
+
+/* ── Stage badge ── */
+.stage-tag { background: var(--stage-bg) !important; border-color: var(--stage-border) !important; color: var(--stage-text) !important; }
 
 /* ── Vote bar ── */
 .vote-section {
   display: flex; align-items: center; gap: 10px;
   margin-top: auto; padding-top: 12px;
-  border-top: 1px solid #1c1c28;
+  border-top: 1px solid var(--border);
 }
 .vote-btn {
   display: flex; align-items: center; gap: 6px;
-  background: #1c1c28; border: 1px solid #2e2e42;
+  background: var(--surface2); border: 1px solid var(--border2);
   border-radius: 9px; padding: 9px 16px;
   font-size: 15px; cursor: pointer;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
-  color: #55558a;
+  color: var(--text2);
 }
-.vote-btn:hover { border-color: #44445a; color: #dddde8; }
-.vote-btn.up.active  { background: #112618; border-color: #1f5c34; color: #4ebb77; }
-.vote-btn.down.active { background: #2c1111; border-color: #5c1f1f; color: #eb6060; }
+.vote-btn:hover { border-color: var(--accent-border); color: var(--text); }
+.vote-btn.up.active   { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+.vote-btn.down.active { background: var(--red-bg);   border-color: var(--red-border);   color: var(--red-text); }
 .vote-btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
 .vote-btn .count { font-weight: 700; min-width: 16px; text-align: center; }
 
 .voter-avatars { margin-left: auto; display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end; max-width: 180px; }
 .voter-chip {
   font-size: 12px; padding: 3px 8px; border-radius: 5px;
-  background: #1c1c28; color: #44447a;
+  background: var(--surface2); color: var(--text2);
 }
-.voter-chip.up   { background: #112618; color: #4ebb77; }
-.voter-chip.down { background: #2c1111; color: #eb6060; }
-
-/* ── Stage badge ── */
-.stage-tag { background: #1a1630 !important; border-color: #352d60 !important; color: #9b8ee8 !important; }
+.voter-chip.up   { background: var(--green-bg); color: var(--green-text); }
+.voter-chip.down { background: var(--red-bg);   color: var(--red-text); }
 
 /* ── Memo drawer ── */
 .memo-toggle {
   display: flex; align-items: center; gap: 6px;
-  background: none; border: none; border-top: 1px solid #1c1c28;
+  background: none; border: none; border-top: 1px solid var(--border);
   padding: 12px 0 0; width: 100%;
-  font-size: 13px; color: #44447a; cursor: pointer;
+  font-size: 13px; color: var(--text2); cursor: pointer;
   text-align: left; transition: color 0.12s;
 }
-.memo-toggle:hover { color: #7b68ee; }
+.memo-toggle:hover { color: var(--accent); }
 .memo-toggle .arrow { font-size: 9px; transition: transform 0.2s; display: inline-block; }
 .memo-toggle.open .arrow { transform: rotate(90deg); }
 .memo-body {
   display: none; padding: 14px 0 0;
-  font-size: 14px; color: #8888b0; line-height: 1.75;
-  border-top: 1px solid #1c1c28; margin-top: 12px;
+  font-size: 14px; color: var(--memo-text); line-height: 1.75;
+  border-top: 1px solid var(--border); margin-top: 12px;
 }
 .memo-body.open { display: block; }
 .memo-body h3 {
-  font-size: 12px; font-weight: 700; color: #c0b8f8;
+  font-size: 12px; font-weight: 700; color: var(--memo-h3);
   text-transform: uppercase; letter-spacing: 0.6px;
   margin: 14px 0 6px;
 }
@@ -234,22 +325,21 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 .memo-body p { margin-bottom: 8px; }
 .memo-body ul { padding-left: 16px; margin-bottom: 8px; }
 .memo-body li { margin-bottom: 4px; }
-.memo-body strong { color: #c8c8e0; font-weight: 600; }
+.memo-body strong { color: var(--memo-strong); font-weight: 600; }
 
 /* ── Survived tab header ── */
 .survived-header {
   display: flex; align-items: center; gap: 10px;
-  margin-bottom: 18px;
-  padding: 12px 16px;
-  background: #112618; border: 1px solid #1f5c34; border-radius: 10px;
-  font-size: 12px; color: #4ebb77;
+  margin-bottom: 18px; padding: 12px 16px;
+  background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 10px;
+  font-size: 12px; color: var(--green-text);
 }
 
 /* ── Empty / loading states ── */
-.state-msg { grid-column: 1/-1; text-align: center; padding: 80px 20px; color: #33336a; font-size: 13px; }
+.state-msg { grid-column: 1/-1; text-align: center; padding: 80px 20px; color: var(--text4); font-size: 13px; }
 .spinner {
   width: 22px; height: 22px;
-  border: 2px solid #22223a; border-top-color: #7b68ee;
+  border: 2px solid var(--spinner-track); border-top-color: var(--accent);
   border-radius: 50%; animation: spin 0.75s linear infinite;
   margin: 0 auto 12px;
 }
@@ -270,7 +360,8 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
     <button class="voter-name-btn" id="voterNameBtn">
       <span id="voterNameLabel">…</span>
     </button>
-    <a href="/auth/logout" id="logoutLink" style="display:none;font-size:11px;color:#33335a;text-decoration:none;margin-left:4px;">sign out</a>
+    <a href="/auth/logout" id="logoutLink" style="display:none;font-size:11px;text-decoration:none;margin-left:4px;color:var(--text4);">sign out</a>
+    <button class="theme-btn" id="themeToggle" title="Toggle theme">🌙</button>
   </div>
 </header>
 
@@ -300,6 +391,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
   <button class="sub-btn stage-btn" data-stage="Early">Early Stage</button>
   <button class="sub-btn stage-btn" data-stage="Growth">Growth Stage</button>
 </div>
+<div id="verticalBar" class="subfilters" style="padding-top: 8px; display: none;"></div>
 
 <main>
   <div class="summary" id="summary"></div>
@@ -311,9 +403,10 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 <script>
 let projects = [];
 let currentVoter = '';
-let currentTab = 'queue';   // queue | survived | all
-let currentSub = 'all';     // all | unvoted | up | down
-let currentStage = 'all';   // all | Early | Growth
+let currentTab = 'queue';      // queue | survived | all
+let currentSub = 'all';        // all | unvoted | up | down
+let currentStage = 'all';      // all | Early | Growth
+let currentVertical = 'all';   // all | <sector name>
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
 (async () => {
@@ -348,6 +441,7 @@ let currentStage = 'all';   // all | Early | Growth
     // else overlay stays visible showing the Google sign-in button
 
     projects = projs;
+    buildVerticalFilter();
     render();
   } catch (err) {
     document.getElementById('grid').innerHTML =
@@ -367,9 +461,9 @@ document.querySelectorAll('.tab').forEach(btn => {
 });
 
 // ── Sub-filters ────────────────────────────────────────────────────────────
-document.querySelectorAll('.sub-btn:not(.stage-btn)').forEach(btn => {
+document.querySelectorAll('.sub-btn:not(.stage-btn):not(.vertical-btn)').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.sub-btn:not(.stage-btn)').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.sub-btn:not(.stage-btn):not(.vertical-btn)').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentSub = btn.dataset.sub;
     render();
@@ -385,6 +479,27 @@ document.querySelectorAll('.stage-btn').forEach(btn => {
   });
 });
 
+// ── Vertical filter (built from project sectors) ───────────────────────────
+function buildVerticalFilter() {
+  const sectors = new Set();
+  projects.forEach(p => (p.sectors || []).forEach(s => sectors.add(s)));
+  const bar = document.getElementById('verticalBar');
+  if (!sectors.size) return;
+  const sorted = [...sectors].sort();
+  bar.innerHTML =
+    `<button class="sub-btn vertical-btn active" data-vertical="all">All verticals</button>` +
+    sorted.map(s => `<button class="sub-btn vertical-btn" data-vertical="${esc(s)}">${esc(s)}</button>`).join('');
+  bar.querySelectorAll('.vertical-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      bar.querySelectorAll('.vertical-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentVertical = btn.dataset.vertical;
+      render();
+    });
+  });
+  bar.style.display = 'flex';
+}
+
 // ── Data helpers ───────────────────────────────────────────────────────────
 function myVote(p) { return (p.voters || {})[currentVoter] || null; }
 
@@ -392,10 +507,11 @@ function queueProjects()    { return projects.filter(p => !p.vote_reviewed); }
 function survivedProjects() { return projects.filter(p => (p.vote_up || 0) >= 1); }
 
 function applySubFilter(list) {
-  if (currentStage !== 'all') list = list.filter(p => p.stage_early_growth === currentStage);
-  if (currentSub === 'unvoted') return list.filter(p => !myVote(p));
-  if (currentSub === 'up')      return list.filter(p => myVote(p) === 'up');
-  if (currentSub === 'down')    return list.filter(p => myVote(p) === 'down');
+  if (currentStage !== 'all')    list = list.filter(p => p.stage_early_growth === currentStage);
+  if (currentVertical !== 'all') list = list.filter(p => (p.sectors || []).includes(currentVertical));
+  if (currentSub === 'unvoted')  return list.filter(p => !myVote(p));
+  if (currentSub === 'up')       return list.filter(p => myVote(p) === 'up');
+  if (currentSub === 'down')     return list.filter(p => myVote(p) === 'down');
   return list;
 }
 
@@ -461,8 +577,6 @@ function cardHTML(p) {
   const vote    = myVote(p);
   const score   = p.score || 0;
   const scoreClass = score >= 70 ? 'high' : score >= 50 ? 'med' : '';
-  const recClass   = p.recommendation === 'deep_dive' ? 'deep_dive' : 'watch';
-  const recLabel   = p.recommendation === 'deep_dive' ? 'Deep Dive' : 'Watch';
   const xUrl = p.x_profile || (p.username ? `https://x.com/${p.username}` : '#');
 
   const sectors  = (p.sectors || []).map(s => `<span class="tag">${esc(s)}</span>`).join('');
@@ -487,7 +601,6 @@ function cardHTML(p) {
       <div class="card-name"><a href="${esc(xUrl)}" target="_blank" rel="noopener">${esc(p.name || p.username)}</a></div>
       <div class="card-sub">
         <span class="card-username">@${esc(p.username)}</span>
-        <span class="rec-badge ${recClass}">${recLabel}</span>
       </div>
     </div>
   </div>
@@ -584,6 +697,21 @@ function renderMemo(text) {
   if (inList) html += '</ul>';
   return html;
 }
+
+// ── Theme ──────────────────────────────────────────────────────────────────
+(function () {
+  const saved = localStorage.getItem('theme') || 'light';
+  applyTheme(saved);
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem('theme', next);
+  });
+  function applyTheme(t) {
+    document.documentElement.dataset.theme = t;
+    document.getElementById('themeToggle').textContent = t === 'dark' ? '☀' : '🌙';
+  }
+})();
 
 function esc(s) {
   if (s == null) return '';
