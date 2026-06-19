@@ -206,6 +206,37 @@ main { max-width: 1280px; margin: 0 auto; padding: 16px 24px 40px; }
 .voter-chip.up   { background: #112618; color: #4ebb77; }
 .voter-chip.down { background: #2c1111; color: #eb6060; }
 
+/* ── Stage badge ── */
+.stage-tag { background: #1a1630 !important; border-color: #352d60 !important; color: #9b8ee8 !important; }
+
+/* ── Memo drawer ── */
+.memo-toggle {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: none; border-top: 1px solid #1c1c28;
+  padding: 10px 0 0; width: 100%;
+  font-size: 11px; color: #44447a; cursor: pointer;
+  text-align: left; transition: color 0.12s;
+}
+.memo-toggle:hover { color: #7b68ee; }
+.memo-toggle .arrow { font-size: 9px; transition: transform 0.2s; display: inline-block; }
+.memo-toggle.open .arrow { transform: rotate(90deg); }
+.memo-body {
+  display: none; padding: 12px 0 0;
+  font-size: 12px; color: #8888b0; line-height: 1.75;
+  border-top: 1px solid #1c1c28; margin-top: 10px;
+}
+.memo-body.open { display: block; }
+.memo-body h3 {
+  font-size: 11px; font-weight: 700; color: #c0b8f8;
+  text-transform: uppercase; letter-spacing: 0.6px;
+  margin: 12px 0 5px;
+}
+.memo-body h3:first-child { margin-top: 0; }
+.memo-body p { margin-bottom: 8px; }
+.memo-body ul { padding-left: 16px; margin-bottom: 8px; }
+.memo-body li { margin-bottom: 4px; }
+.memo-body strong { color: #c8c8e0; font-weight: 600; }
+
 /* ── Survived tab header ── */
 .survived-header {
   display: flex; align-items: center; gap: 10px;
@@ -402,6 +433,14 @@ function render() {
       await submitVote(notionId, btn.dataset.vote);
     });
   });
+
+  grid.querySelectorAll('.memo-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('open');
+      const body = document.getElementById(`memo-${btn.dataset.id}`);
+      if (body) body.classList.toggle('open');
+    });
+  });
 }
 
 function cardHTML(p) {
@@ -413,7 +452,9 @@ function cardHTML(p) {
   const xUrl = p.x_profile || (p.username ? `https://x.com/${p.username}` : '#');
 
   const sectors  = (p.sectors || []).map(s => `<span class="tag">${esc(s)}</span>`).join('');
-  const stageTags = [p.stage].filter(Boolean).map(s => `<span class="tag">${esc(s)}</span>`).join('');
+  const stageLabel = p.stage_early_growth === 'Early' ? 'Early Stage'
+                   : p.stage_early_growth === 'Growth' ? 'Growth Stage' : null;
+  const stageBadge = stageLabel ? `<span class="tag stage-tag">${stageLabel}</span>` : '';
 
   const voterChips = Object.entries(p.voters || {})
     .map(([name, v]) => `<span class="voter-chip ${v}">${esc(name)}</span>`)
@@ -441,8 +482,13 @@ function cardHTML(p) {
     </div>
   </div>
   ${p.one_liner ? `<div class="card-one-liner">${esc(p.one_liner)}</div>` : ''}
-  ${(sectors || stageTags) ? `<div class="tags">${sectors}${stageTags}</div>` : ''}
+  ${(stageBadge || sectors) ? `<div class="tags">${stageBadge}${sectors}</div>` : ''}
   ${watcherText}
+  ${p.memo ? `
+  <button class="memo-toggle" data-id="${esc(p.notion_id)}">
+    <span class="arrow">▶</span> View memo
+  </button>
+  <div class="memo-body" id="memo-${esc(p.notion_id)}">${renderMemo(p.memo)}</div>` : ''}
   <div class="vote-section">
     <button class="vote-btn up ${vote === 'up' ? 'active' : ''}" data-vote="up" ${!currentVoter ? 'disabled' : ''}>
       👍 <span class="count">${p.vote_up || 0}</span>
@@ -501,6 +547,33 @@ async function submitVote(notionId, vote) {
     render();
     console.error('Vote failed:', err);
   }
+}
+
+function renderMemo(text) {
+  if (!text) return '';
+  const lines = text.split('\n');
+  let html = '';
+  let inList = false;
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) {
+      if (inList) { html += '</ul>'; inList = false; }
+      continue;
+    }
+    const applyBold = s => esc(s).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    if (/^#{1,3} /.test(t)) {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += `<h3>${esc(t.replace(/^#{1,3} /, ''))}</h3>`;
+    } else if (/^[-•] /.test(t)) {
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += `<li>${applyBold(t.slice(2))}</li>`;
+    } else {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += `<p>${applyBold(t)}</p>`;
+    }
+  }
+  if (inList) html += '</ul>';
+  return html;
 }
 
 function esc(s) {

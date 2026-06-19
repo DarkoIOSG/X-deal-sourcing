@@ -217,6 +217,7 @@ def _parse_page(page: dict) -> dict:
         "one_liner":      _read(props, PROP_ONE_LINER),
         "sectors":        _read(props, PROP_SECTOR),
         "stage":          _read(props, PROP_STAGE),
+        "stage_early_growth": _read(props, PROP_STAGE_EARLY_GROWTH),
         "token_status":   _read(props, PROP_TOKEN_STATUS),
         "account_type":   _read(props, PROP_ACCOUNT_TYPE),
         "last_tweet":     _read(props, PROP_LAST_TWEET),
