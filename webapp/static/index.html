@@ -110,6 +110,7 @@ header {
 }
 .sub-btn:hover { color: #aaaacc; border-color: #44445a; }
 .sub-btn.active { background: #2a2845; border-color: #5a52a0; color: #c0b8f8; }
+.filter-divider { width: 1px; background: #22222e; margin: 0 6px; align-self: stretch; }
 
 /* ── Main ── */
 main { max-width: 1280px; margin: 0 auto; padding: 16px 24px 40px; }
@@ -296,6 +297,10 @@ main { max-width: 1280px; margin: 0 auto; padding: 16px 24px 40px; }
   <button class="sub-btn" data-sub="unvoted">Not voted</button>
   <button class="sub-btn" data-sub="up">Voted up</button>
   <button class="sub-btn" data-sub="down">Voted down</button>
+  <span class="filter-divider"></span>
+  <button class="sub-btn stage-btn active" data-stage="all">All stages</button>
+  <button class="sub-btn stage-btn" data-stage="Early">Early Stage</button>
+  <button class="sub-btn stage-btn" data-stage="Growth">Growth Stage</button>
 </div>
 
 <main>
@@ -310,6 +315,7 @@ let projects = [];
 let currentVoter = '';
 let currentTab = 'queue';   // queue | survived | all
 let currentSub = 'all';     // all | unvoted | up | down
+let currentStage = 'all';   // all | Early | Growth
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
 (async () => {
@@ -363,11 +369,20 @@ document.querySelectorAll('.tab').forEach(btn => {
 });
 
 // ── Sub-filters ────────────────────────────────────────────────────────────
-document.querySelectorAll('.sub-btn').forEach(btn => {
+document.querySelectorAll('.sub-btn:not(.stage-btn)').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.sub-btn:not(.stage-btn)').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentSub = btn.dataset.sub;
+    render();
+  });
+});
+
+document.querySelectorAll('.stage-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentStage = btn.dataset.stage;
     render();
   });
 });
@@ -379,6 +394,7 @@ function queueProjects()    { return projects.filter(p => !p.vote_reviewed); }
 function survivedProjects() { return projects.filter(p => (p.vote_up || 0) >= 1); }
 
 function applySubFilter(list) {
+  if (currentStage !== 'all') list = list.filter(p => p.stage_early_growth === currentStage);
   if (currentSub === 'unvoted') return list.filter(p => !myVote(p));
   if (currentSub === 'up')      return list.filter(p => myVote(p) === 'up');
   if (currentSub === 'down')    return list.filter(p => myVote(p) === 'down');
