@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import requests as http
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from itsdangerous import URLSafeSerializer, BadSignature
 from pydantic import BaseModel
 
@@ -23,6 +24,7 @@ from shared.notion import (
 )
 
 app = FastAPI(title="IOSG Deal Radar")
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")), name="static")
 
 _HTML_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "index.html")
 _REVIEW_DAYS = 14
