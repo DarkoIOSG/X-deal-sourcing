@@ -291,13 +291,20 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 .vote-btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
 .vote-btn .count { font-weight: 700; min-width: 16px; text-align: center; }
 
-.voter-avatars { margin-left: auto; display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end; max-width: 180px; }
+.voter-avatars { margin-left: auto; display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end; max-width: 200px; }
 .voter-chip {
-  font-size: 12px; padding: 3px 8px; border-radius: 5px;
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; padding: 3px 8px 3px 4px; border-radius: 20px;
   background: var(--surface2); color: var(--text2);
 }
 .voter-chip.up   { background: var(--green-bg); color: var(--green-text); }
 .voter-chip.down { background: var(--red-bg);   color: var(--red-text); }
+.voter-chip img {
+  width: 20px; height: 20px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+}
+.voter-name-btn img {
+  width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+}
 
 /* ── Memo drawer ── */
 .memo-toggle {
@@ -392,6 +399,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
   <div class="voter-wrap">
     <span class="voter-label">Voting as</span>
     <button class="voter-name-btn" id="voterNameBtn">
+      <img id="voterAvatarImg" src="" alt="" style="display:none;" onerror="this.style.display='none'">
       <span id="voterNameLabel">…</span>
     </button>
     <a href="/auth/logout" id="logoutLink" style="display:none;font-size:11px;text-decoration:none;margin-left:4px;color:var(--text4);">sign out</a>
@@ -441,6 +449,21 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 </main>
 
 <script>
+const VOTER_AVATARS = {
+  'Darko':  '/static/darko.jpg',
+  'Momir':  '/static/momir.jpg',
+  'Jocy':   '/static/jocy.jpg',
+  'Mario':  '/static/mario.jpg',
+  'Yiping': '/static/yiping.jpg',
+  'Frank':  '/static/frank.jpg',
+};
+
+function voterAvatarImg(name, size = 20) {
+  const src = VOTER_AVATARS[name];
+  if (!src) return '';
+  return `<img src="${src}" width="${size}" height="${size}" alt="${esc(name)}" onerror="this.style.display='none'" style="border-radius:50%;object-fit:cover;flex-shrink:0;">`;
+}
+
 let projects = [];
 let currentVoter = '';
 let currentTab = 'queue';      // queue | survived | all
@@ -472,11 +495,13 @@ let currentVertical = 'all';   // all | <sector name>
     ]);
 
     if (me.voter) {
-      // Already authenticated via cookie
       currentVoter = me.voter;
       document.getElementById('voterNameLabel').textContent = me.voter;
       document.getElementById('logoutLink').style.display = 'inline';
       document.getElementById('voterOverlay').classList.add('hidden');
+      const avatarEl = document.getElementById('voterAvatarImg');
+      const src = VOTER_AVATARS[me.voter];
+      if (src) { avatarEl.src = src; avatarEl.style.display = 'block'; }
     }
     // else overlay stays visible showing the Google sign-in button
 
@@ -641,7 +666,7 @@ function cardHTML(p) {
   const stageBadge = stageLabel ? `<span class="tag stage-tag">${stageLabel}</span>` : '';
 
   const voterChips = Object.entries(p.voters || {})
-    .map(([name, v]) => `<span class="voter-chip ${v}">${esc(name)}</span>`)
+    .map(([name, v]) => `<span class="voter-chip ${v}">${voterAvatarImg(name)}${esc(name)}</span>`)
     .join('');
 
   const reviewedBadge = p.vote_reviewed
