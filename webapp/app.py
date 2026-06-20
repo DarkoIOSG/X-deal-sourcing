@@ -121,6 +121,18 @@ def auth_logout():
     return redirect
 
 
+@app.get("/dev/login")
+def dev_login(name: str, request: Request):
+    """Dev-only shortcut to set voter identity without Google OAuth."""
+    if not APP_URL.startswith("http://localhost"):
+        raise HTTPException(status_code=404)
+    if name not in TEAM_MEMBERS:
+        raise HTTPException(status_code=400, detail=f"Unknown member. Choose from: {TEAM_MEMBERS}")
+    redirect = RedirectResponse(url="/", status_code=302)
+    _set_voter_cookie(redirect, name)
+    return redirect
+
+
 # ── App routes ─────────────────────────────────────────────────────────────
 
 @app.get("/")
