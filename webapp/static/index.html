@@ -424,8 +424,8 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 </div>
 
 <div id="subfilterBar" class="subfilters">
-  <button class="sub-btn active" data-sub="all">All</button>
-  <button class="sub-btn" data-sub="unvoted">Not voted</button>
+  <button class="sub-btn" data-sub="all">All</button>
+  <button class="sub-btn active" data-sub="unvoted">Not voted</button>
   <button class="sub-btn" data-sub="up">Voted up</button>
   <button class="sub-btn" data-sub="down">Voted down</button>
   <span class="filter-divider"></span>
@@ -467,7 +467,7 @@ function voterAvatarImg(name, size = 20) {
 let projects = [];
 let currentVoter = '';
 let currentTab = 'queue';      // queue | survived | all
-let currentSub = 'all';        // all | unvoted | up | down
+let currentSub = 'unvoted';    // all | unvoted | up | down
 let currentStage = 'all';      // all | Early | Growth
 let currentVertical = 'all';   // all | <sector name>
 
