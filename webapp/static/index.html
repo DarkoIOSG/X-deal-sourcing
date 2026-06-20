@@ -509,6 +509,7 @@ let projects = [];
 let assignedProjects = [];
 let TEAM_MEMBERS = [];
 let PARTNERS = new Set();
+let ASSIGNEES = [];
 let currentVoter = '';
 let currentTab = 'queue';      // queue | survived | all | assigned
 let currentSub = 'unvoted';    // all | unvoted | up | down
@@ -541,6 +542,7 @@ let currentVertical = 'all';   // all | <sector name>
 
     TEAM_MEMBERS = cfg.team_members || [];
     PARTNERS = new Set(cfg.partners || []);
+    ASSIGNEES = cfg.assignees || [];
 
     if (me.voter) {
       currentVoter = me.voter;
@@ -770,7 +772,7 @@ function cardHTML(p) {
         Assign <span class="assign-count">${(p.assigned_to||[]).length ? `(${p.assigned_to.length})` : ''}</span>
       </button>
       <div class="assign-panel">
-        ${TEAM_MEMBERS.map(m => `
+        ${ASSIGNEES.map(m => `
           <div class="assign-item${(p.assigned_to||[]).includes(m) ? ' assigned' : ''}" data-member="${esc(m)}">
             ${voterAvatarImg(m, 22)}${esc(m)}<span class="check">✓</span>
           </div>`).join('')}

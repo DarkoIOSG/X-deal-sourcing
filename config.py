@@ -21,6 +21,7 @@ MIN_WATCHERS = 1  # minimum watchlist members that must follow an account to sur
 
 # Voting webapp — team
 TEAM_MEMBERS = ["Darko", "Jocy", "Momir", "Yiping", "Frank", "Mario"]
+ASSIGNEES    = ["Yiping", "Frank", "Mario"]  # members partners can assign projects to
 
 TEAM_EMAILS: dict[str, str] = {f"{n.lower()}@iosg.vc": n for n in TEAM_MEMBERS}
 

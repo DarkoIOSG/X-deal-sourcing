@@ -13,7 +13,7 @@ from itsdangerous import URLSafeSerializer, BadSignature
 from pydantic import BaseModel
 
 from config import (
-    TEAM_MEMBERS, TEAM_EMAILS,
+    TEAM_MEMBERS, TEAM_EMAILS, ASSIGNEES,
     SECRET_KEY, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, APP_URL,
 )
 from shared.notion import (
@@ -143,7 +143,7 @@ def index():
 
 @app.get("/api/config")
 def get_config():
-    return {"team_members": TEAM_MEMBERS, "partners": list(PARTNERS)}
+    return {"team_members": TEAM_MEMBERS, "partners": list(PARTNERS), "assignees": ASSIGNEES}
 
 
 @app.get("/api/me")
