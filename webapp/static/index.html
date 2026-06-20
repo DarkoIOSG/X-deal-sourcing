@@ -21,10 +21,10 @@ html {
   --text2:           #7070a8;
   --text3:           #8888bb;
   --text4:           #a0a0c8;
-  --accent:          #6b56e0;
-  --accent-bg:       #ede9ff;
-  --accent-border:   #9080d0;
-  --accent-text:     #4030a0;
+  --accent:          #e05c38;
+  --accent-bg:       #fde8e0;
+  --accent-border:   #cc6040;
+  --accent-text:     #8a2010;
   --green-bg:        #e6f7ee;
   --green-border:    #58b878;
   --green-text:      #1a6a38;
@@ -48,8 +48,8 @@ html {
   --tag-text:        #6060a0;
   --badge-bg:        #e8e8f5;
   --badge-text:      #8888bb;
-  --badge-active-bg: #e0dcff;
-  --badge-active-text:#4a38b0;
+  --badge-active-bg: #fde0d0;
+  --badge-active-text:#8a2010;
 }
 html[data-theme="dark"] {
   --bg:              #0d0d12;
@@ -62,10 +62,10 @@ html[data-theme="dark"] {
   --text2:           #55558a;
   --text3:           #7777a0;
   --text4:           #33336a;
-  --accent:          #7b68ee;
-  --accent-bg:       #2a2845;
-  --accent-border:   #5a52a0;
-  --accent-text:     #c0b8f8;
+  --accent:          #e8724a;
+  --accent-bg:       #3a1a0c;
+  --accent-border:   #a04030;
+  --accent-text:     #f8a870;
   --green-bg:        #112618;
   --green-border:    #1f5c34;
   --green-text:      #4ebb77;
@@ -89,8 +89,8 @@ html[data-theme="dark"] {
   --tag-text:        #5a5a88;
   --badge-bg:        #22223a;
   --badge-text:      #7777aa;
-  --badge-active-bg: #2e2b55;
-  --badge-active-text:#a89fee;
+  --badge-active-bg: #3a1a0c;
+  --badge-active-text:#f8a870;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -344,12 +344,46 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
   margin: 0 auto 12px;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Logo unicorn image ── */
+.logo-unicorn {
+  height: 34px; width: auto;
+  image-rendering: pixelated;
+  display: block; flex-shrink: 0;
+}
+
+/* ── Vertical dropdown ── */
+.dropdown { position: relative; }
+.dropdown-toggle {
+  display: flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.dropdown-arrow { font-size: 10px; transition: transform 0.15s; }
+.dropdown.open .dropdown-arrow { transform: rotate(180deg); }
+.dropdown-panel {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 300;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 5px;
+  min-width: 190px; display: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+.dropdown.open .dropdown-panel { display: block; }
+.dropdown-item {
+  display: block; width: 100%; text-align: left;
+  background: none; border: none; padding: 8px 12px;
+  border-radius: 6px; font-size: 13px; color: var(--text2);
+  cursor: pointer; transition: background 0.1s, color 0.1s;
+}
+.dropdown-item:hover { background: var(--surface2); color: var(--text); }
+.dropdown-item.active { background: var(--accent-bg); color: var(--accent-text); font-weight: 600; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">IOSG <span>Radar</span></div>
+  <div class="logo" style="display:flex;align-items:center;gap:10px;">
+    <img src="/static/unicorn.png" class="logo-unicorn" alt="IOSG" onerror="this.style.display='none'">
+    IOSG <span>Radar</span>
+  </div>
   <div class="tabs">
     <button class="tab active" data-tab="queue">Queue <span class="badge" id="badge-queue">—</span></button>
     <button class="tab" data-tab="survived">Survived <span class="badge" id="badge-survived">—</span></button>
@@ -390,8 +424,14 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
   <button class="sub-btn stage-btn active" data-stage="all">All stages</button>
   <button class="sub-btn stage-btn" data-stage="Early">Early Stage</button>
   <button class="sub-btn stage-btn" data-stage="Growth">Growth Stage</button>
+  <span class="filter-divider"></span>
+  <div class="dropdown" id="verticalDropdown" style="display:none">
+    <button class="sub-btn dropdown-toggle" id="verticalToggle">
+      <span class="dropdown-label">All verticals</span> <span class="dropdown-arrow">▾</span>
+    </button>
+    <div class="dropdown-panel" id="verticalPanel"></div>
+  </div>
 </div>
-<div id="verticalBar" class="subfilters" style="padding-top: 8px; display: none;"></div>
 
 <main>
   <div class="summary" id="summary"></div>
@@ -479,26 +519,42 @@ document.querySelectorAll('.stage-btn').forEach(btn => {
   });
 });
 
-// ── Vertical filter (built from project sectors) ───────────────────────────
+// ── Vertical filter dropdown ────────────────────────────────────────────────
 function buildVerticalFilter() {
   const sectors = new Set();
   projects.forEach(p => (p.sectors || []).forEach(s => sectors.add(s)));
-  const bar = document.getElementById('verticalBar');
+  const dropdown = document.getElementById('verticalDropdown');
+  const panel    = document.getElementById('verticalPanel');
+  const toggle   = document.getElementById('verticalToggle');
+  const label    = toggle.querySelector('.dropdown-label');
+
   if (!sectors.size) return;
+  dropdown.style.display = '';
+
   const sorted = [...sectors].sort();
-  bar.innerHTML =
-    `<button class="sub-btn vertical-btn active" data-vertical="all">All verticals</button>` +
-    sorted.map(s => `<button class="sub-btn vertical-btn" data-vertical="${esc(s)}">${esc(s)}</button>`).join('');
-  bar.querySelectorAll('.vertical-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      bar.querySelectorAll('.vertical-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentVertical = btn.dataset.vertical;
+  panel.innerHTML =
+    `<button class="dropdown-item active" data-vertical="all">All verticals</button>` +
+    sorted.map(s => `<button class="dropdown-item" data-vertical="${esc(s)}">${esc(s)}</button>`).join('');
+
+  panel.querySelectorAll('.dropdown-item').forEach(item => {
+    item.addEventListener('click', () => {
+      currentVertical = item.dataset.vertical;
+      panel.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      label.textContent = currentVertical === 'all' ? 'All verticals' : currentVertical;
+      dropdown.classList.remove('open');
       render();
     });
   });
-  bar.style.display = 'flex';
 }
+
+document.getElementById('verticalToggle').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('verticalDropdown').classList.toggle('open');
+});
+document.addEventListener('click', () => {
+  document.getElementById('verticalDropdown').classList.remove('open');
+});
 
 // ── Data helpers ───────────────────────────────────────────────────────────
 function myVote(p) { return (p.voters || {})[currentVoter] || null; }
