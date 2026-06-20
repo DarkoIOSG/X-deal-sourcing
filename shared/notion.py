@@ -176,7 +176,7 @@ def _read(props: dict, name: str):
         return t[0]["plain_text"] if t else ""
     if ptype == "rich_text":
         rt = prop.get("rich_text", [])
-        return rt[0]["plain_text"] if rt else ""
+        return "".join(chunk["plain_text"] for chunk in rt)
     if ptype == "number":
         return prop.get("number")
     if ptype == "checkbox":
