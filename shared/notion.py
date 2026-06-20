@@ -73,6 +73,7 @@ PROP_VOTE_UP        = "Vote_Up"
 PROP_VOTE_DOWN      = "Vote_Down"
 PROP_VOTERS         = "Voters"
 PROP_VOTE_REVIEWED  = "Vote_Reviewed"
+PROP_ASSIGNED_TO    = "Assigned_To"
 
 # ── Property type map (used by update_row) ────────────────────────────────────
 _FIELD_TYPES: dict[str, str] = {
@@ -113,6 +114,7 @@ _FIELD_TYPES: dict[str, str] = {
     PROP_VOTE_DOWN:             "number",
     PROP_VOTERS:                "rich_text",
     PROP_VOTE_REVIEWED:         "checkbox",
+    PROP_ASSIGNED_TO:           "rich_text",
     PROP_CHECKED_ON_SURF:       "checkbox",
     PROP_RAISED:                "checkbox",
     PROP_LAST_ROUND_DATE:       "date",
@@ -207,6 +209,11 @@ def _parse_page(page: dict) -> dict:
         voters = json.loads(voters_raw) if voters_raw else {}
     except (json.JSONDecodeError, ValueError):
         voters = {}
+    assigned_raw = _read(props, PROP_ASSIGNED_TO)
+    try:
+        assigned_to = json.loads(assigned_raw) if assigned_raw else []
+    except (json.JSONDecodeError, ValueError):
+        assigned_to = []
     return {
         "notion_id":      page["id"],
         "account_id":     str(int(float(raw_id))) if raw_id else "",
@@ -240,6 +247,7 @@ def _parse_page(page: dict) -> dict:
         "vote_up":              _read(props, PROP_VOTE_UP) or 0,
         "vote_down":            _read(props, PROP_VOTE_DOWN) or 0,
         "voters":               voters,
+        "assigned_to":          assigned_to,
     }
 
 
@@ -319,6 +327,35 @@ def get_project(notion_id: str) -> dict:
     r = requests.get(f"{_PAGE_URL}/{notion_id}", headers=_HEADERS, timeout=30)
     r.raise_for_status()
     return _parse_page(r.json())
+
+
+def sync_assigned_to(notion_id: str, assignees: list):
+    """Write the list of assignees back to a Notion page."""
+    update_row(notion_id, {PROP_ASSIGNED_TO: json.dumps(assignees, ensure_ascii=False)})
+
+
+def query_assigned_projects(voter_name: str) -> list[dict]:
+    """Return all projects assigned to voter_name."""
+    payload = {
+        "filter": {
+            "property": PROP_ASSIGNED_TO,
+            "rich_text": {"contains": voter_name},
+        },
+        "sorts": [{"property": PROP_PROCESSED_AT, "direction": "descending"}],
+    }
+    pages: list[dict] = []
+    cursor = None
+    while True:
+        if cursor:
+            payload["start_cursor"] = cursor
+        r = requests.post(_DB_URL, headers=_HEADERS, json=payload, timeout=30)
+        r.raise_for_status()
+        data = r.json()
+        pages.extend(_parse_page(p) for p in data.get("results", []))
+        if not data.get("has_more"):
+            break
+        cursor = data.get("next_cursor")
+    return pages
 
 
 def update_row(notion_id: str, fields: dict):

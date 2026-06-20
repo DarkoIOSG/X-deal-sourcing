@@ -21,7 +21,11 @@ from shared.notion import (
     get_project,
     sync_votes,
     flag_reviewed,
+    sync_assigned_to,
+    query_assigned_projects,
 )
+
+PARTNERS = {"Jocy", "Momir"}
 
 app = FastAPI(title="IOSG Deal Radar")
 app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")), name="static")
@@ -127,7 +131,7 @@ def index():
 
 @app.get("/api/config")
 def get_config():
-    return {"team_members": TEAM_MEMBERS}
+    return {"team_members": TEAM_MEMBERS, "partners": list(PARTNERS)}
 
 
 @app.get("/api/me")
@@ -175,6 +179,33 @@ def submit_vote(req: VoteRequest, request: Request):
         flag_reviewed(req.notion_id)
 
     return {"vote_up": up, "vote_down": down, "voters": voters, "reviewed": reviewed}
+
+
+class AssignRequest(BaseModel):
+    notion_id: str
+    assignees: list[str]
+
+
+@app.post("/api/assign")
+def assign_project(req: AssignRequest, request: Request):
+    voter_name = _get_voter(request)
+    if not voter_name:
+        raise HTTPException(status_code=401, detail="not authenticated")
+    if voter_name not in PARTNERS:
+        raise HTTPException(status_code=403, detail="only partners can assign projects")
+    invalid = [a for a in req.assignees if a not in TEAM_MEMBERS]
+    if invalid:
+        raise HTTPException(status_code=400, detail=f"unknown members: {invalid}")
+    sync_assigned_to(req.notion_id, req.assignees)
+    return {"assigned_to": req.assignees}
+
+
+@app.get("/api/assigned")
+def get_assigned(request: Request):
+    voter_name = _get_voter(request)
+    if not voter_name:
+        raise HTTPException(status_code=401, detail="not authenticated")
+    return query_assigned_projects(voter_name)
 
 
 def _should_auto_review(project: dict) -> bool:

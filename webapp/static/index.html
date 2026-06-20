@@ -382,6 +382,46 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 }
 .dropdown-item:hover { background: var(--surface2); color: var(--text); }
 .dropdown-item.active { background: var(--accent-bg); color: var(--accent-text); font-weight: 600; }
+
+/* ── Assign ── */
+.assign-wrap { position: relative; }
+.assign-btn {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 7px; padding: 7px 11px; font-size: 12px;
+  color: var(--text2); cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+.assign-btn:hover { border-color: var(--accent-border); color: var(--accent-text); }
+.assign-btn.has-assignees { border-color: var(--accent-border); color: var(--accent-text); background: var(--accent-bg); }
+.assign-panel {
+  position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 300;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 5px; min-width: 170px; display: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+}
+.assign-panel.open { display: block; }
+.assign-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; border-radius: 6px; cursor: pointer;
+  font-size: 13px; color: var(--text2); transition: background 0.1s;
+  user-select: none;
+}
+.assign-item:hover { background: var(--surface2); color: var(--text); }
+.assign-item.assigned { color: var(--accent-text); font-weight: 600; }
+.assign-item .check { font-size: 11px; margin-left: auto; opacity: 0; }
+.assign-item.assigned .check { opacity: 1; }
+.assign-item img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+
+/* ── Assigned-to chips on card ── */
+.assigned-to-row { display: flex; flex-wrap: wrap; gap: 5px; }
+.assigned-chip {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; padding: 3px 8px 3px 4px; border-radius: 20px;
+  background: var(--accent-bg); color: var(--accent-text); border: 1px solid var(--accent-border);
+}
+.assigned-chip img { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; }
 </style>
 </head>
 <body>
@@ -395,6 +435,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
     <button class="tab active" data-tab="queue">Queue <span class="badge" id="badge-queue">—</span></button>
     <button class="tab" data-tab="survived">Survived <span class="badge" id="badge-survived">—</span></button>
     <button class="tab" data-tab="all">All <span class="badge" id="badge-all">—</span></button>
+    <button class="tab" data-tab="assigned" id="tab-assigned" style="display:none">Assigned <span class="badge" id="badge-assigned">—</span></button>
   </div>
   <div class="voter-wrap">
     <span class="voter-label">Voting as</span>
@@ -465,8 +506,11 @@ function voterAvatarImg(name, size = 20) {
 }
 
 let projects = [];
+let assignedProjects = [];
+let TEAM_MEMBERS = [];
+let PARTNERS = new Set();
 let currentVoter = '';
-let currentTab = 'queue';      // queue | survived | all
+let currentTab = 'queue';      // queue | survived | all | assigned
 let currentSub = 'unvoted';    // all | unvoted | up | down
 let currentStage = 'all';      // all | Early | Growth
 let currentVertical = 'all';   // all | <sector name>
@@ -489,10 +533,14 @@ let currentVertical = 'all';   // all | <sector name>
   }
 
   try {
-    const [me, projs] = await Promise.all([
+    const [me, cfg, projs] = await Promise.all([
       fetch('/api/me').then(r => r.json()),
+      fetch('/api/config').then(r => r.json()),
       fetch('/api/projects').then(r => r.json()),
     ]);
+
+    TEAM_MEMBERS = cfg.team_members || [];
+    PARTNERS = new Set(cfg.partners || []);
 
     if (me.voter) {
       currentVoter = me.voter;
@@ -502,8 +550,9 @@ let currentVertical = 'all';   // all | <sector name>
       const avatarEl = document.getElementById('voterAvatarImg');
       const src = VOTER_AVATARS[me.voter];
       if (src) { avatarEl.src = src; avatarEl.style.display = 'block'; }
+      document.getElementById('tab-assigned').style.display = '';
+      assignedProjects = await fetch('/api/assigned').then(r => r.json());
     }
-    // else overlay stays visible showing the Google sign-in button
 
     projects = projs;
     buildVerticalFilter();
@@ -579,6 +628,7 @@ document.getElementById('verticalToggle').addEventListener('click', e => {
 });
 document.addEventListener('click', () => {
   document.getElementById('verticalDropdown').classList.remove('open');
+  document.querySelectorAll('.assign-panel.open').forEach(p => p.classList.remove('open'));
 });
 
 // ── Data helpers ───────────────────────────────────────────────────────────
@@ -599,6 +649,7 @@ function applySubFilter(list) {
 function visibleProjects() {
   if (currentTab === 'queue')    return applySubFilter(queueProjects());
   if (currentTab === 'survived') return survivedProjects().sort((a, b) => (b.vote_up || 0) - (a.vote_up || 0) || (b.score || 0) - (a.score || 0));
+  if (currentTab === 'assigned') return assignedProjects;
   return projects; // all
 }
 
@@ -612,6 +663,7 @@ function render() {
   document.getElementById('badge-queue').textContent    = queue.length;
   document.getElementById('badge-survived').textContent = survived.length;
   document.getElementById('badge-all').textContent      = projects.length;
+  document.getElementById('badge-assigned').textContent = assignedProjects.length;
 
   // Summary line
   const qVoted = queue.filter(p => myVote(p)).length;
@@ -620,6 +672,8 @@ function render() {
     summaryEl.textContent = `${queue.length} in queue · ${qVoted} voted · ${queue.length - qVoted} remaining`;
   } else if (currentTab === 'survived') {
     summaryEl.textContent = `${survived.length} project${survived.length !== 1 ? 's' : ''} with at least one 👍`;
+  } else if (currentTab === 'assigned') {
+    summaryEl.textContent = `${assignedProjects.length} project${assignedProjects.length !== 1 ? 's' : ''} assigned to you`;
   } else {
     summaryEl.textContent = `${projects.length} total · ${projects.filter(p => p.vote_reviewed).length} reviewed`;
   }
@@ -630,9 +684,10 @@ function render() {
     const msgs = {
       queue: 'No projects in the queue.',
       survived: 'No projects have received a thumbs up yet.',
+      assigned: 'No projects have been assigned to you yet.',
       all: 'No projects found.',
     };
-    grid.innerHTML = `<div class="state-msg">${msgs[currentTab]}</div>`;
+    grid.innerHTML = `<div class="state-msg">${msgs[currentTab] || 'No projects found.'}</div>`;
     return;
   }
 
@@ -650,6 +705,37 @@ function render() {
       btn.classList.toggle('open');
       const body = document.getElementById(`memo-${btn.dataset.id}`);
       if (body) body.classList.toggle('open');
+    });
+  });
+
+  grid.querySelectorAll('.assign-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const panel = btn.nextElementSibling;
+      const isOpen = panel.classList.contains('open');
+      document.querySelectorAll('.assign-panel.open').forEach(p => p.classList.remove('open'));
+      if (!isOpen) panel.classList.add('open');
+    });
+  });
+
+  grid.querySelectorAll('.assign-item').forEach(item => {
+    item.addEventListener('click', async e => {
+      e.stopPropagation();
+      const card = item.closest('.card');
+      const notionId = card.dataset.id;
+      const member = item.dataset.member;
+      const proj = [...projects, ...assignedProjects].find(p => p.notion_id === notionId);
+      if (!proj) return;
+      const current = [...(proj.assigned_to || [])];
+      const idx = current.indexOf(member);
+      if (idx >= 0) current.splice(idx, 1); else current.push(member);
+      proj.assigned_to = current;
+      item.classList.toggle('assigned');
+      const countEl = card.querySelector('.assign-count');
+      if (countEl) countEl.textContent = current.length ? `(${current.length})` : '';
+      const assignBtn = card.querySelector('.assign-btn');
+      if (assignBtn) assignBtn.classList.toggle('has-assignees', current.length > 0);
+      await submitAssign(notionId, current);
     });
   });
 }
@@ -673,6 +759,24 @@ function cardHTML(p) {
     ? `<div class="reviewed-badge">reviewed</div>`
     : '';
 
+  const assignedChips = (p.assigned_to || []).length
+    ? `<div class="assigned-to-row">${(p.assigned_to).map(m =>
+        `<span class="assigned-chip">${voterAvatarImg(m, 18)}${esc(m)}</span>`).join('')}</div>`
+    : '';
+
+  const assignBtn = PARTNERS.has(currentVoter) ? `
+    <div class="assign-wrap" style="margin-left:auto">
+      <button class="assign-btn${(p.assigned_to||[]).length ? ' has-assignees' : ''}">
+        Assign <span class="assign-count">${(p.assigned_to||[]).length ? `(${p.assigned_to.length})` : ''}</span>
+      </button>
+      <div class="assign-panel">
+        ${TEAM_MEMBERS.map(m => `
+          <div class="assign-item${(p.assigned_to||[]).includes(m) ? ' assigned' : ''}" data-member="${esc(m)}">
+            ${voterAvatarImg(m, 22)}${esc(m)}<span class="check">✓</span>
+          </div>`).join('')}
+      </div>
+    </div>` : '';
+
   return `
 <div class="card${p.vote_reviewed ? ' reviewed' : ''}" data-id="${esc(p.notion_id)}">
   ${reviewedBadge}
@@ -687,6 +791,7 @@ function cardHTML(p) {
   </div>
   ${p.one_liner ? `<div class="card-one-liner">${esc(p.one_liner)}</div>` : ''}
   ${(stageBadge || sectors) ? `<div class="tags">${stageBadge}${sectors}</div>` : ''}
+  ${assignedChips}
   ${p.memo ? `
   <button class="memo-toggle" data-id="${esc(p.notion_id)}">
     <span class="arrow">▶</span> View memo
@@ -700,6 +805,7 @@ function cardHTML(p) {
       👎 <span class="count">${p.vote_down || 0}</span>
     </button>
     ${voterChips ? `<div class="voter-avatars">${voterChips}</div>` : ''}
+    ${assignBtn}
   </div>
 </div>`;
 }
@@ -749,6 +855,23 @@ async function submitVote(notionId, vote) {
     }
     render();
     console.error('Vote failed:', err);
+  }
+}
+
+// ── Assign submission ──────────────────────────────────────────────────────
+async function submitAssign(notionId, assignees) {
+  try {
+    const res = await fetch('/api/assign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notion_id: notionId, assignees }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    const proj = [...projects, ...assignedProjects].find(p => p.notion_id === notionId);
+    if (proj) proj.assigned_to = data.assigned_to;
+  } catch (err) {
+    console.error('Assign failed:', err);
   }
 }
 
