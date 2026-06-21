@@ -247,6 +247,11 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 .card-name a:hover { color: var(--accent); }
 .card-sub { display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
 .card-username { font-size: 13px; color: var(--text2); }
+.card-project-name {
+  font-size: 12px; font-weight: 600; color: var(--stage-text);
+  background: var(--stage-bg); border: 1px solid var(--stage-border);
+  border-radius: 5px; padding: 2px 8px;
+}
 
 .score-badge {
   flex-shrink: 0; border-radius: 8px; padding: 5px 11px;
@@ -765,11 +770,20 @@ function fundingHTML(p) {
   return `<div class="funding-info">${rows}</div>`;
 }
 
+function extractProjectName(memo) {
+  if (!memo) return null;
+  const m = memo.match(/^##\s+\[([^\]]+)\]/m);
+  return m ? m[1].trim() : null;
+}
+
 function cardHTML(p) {
   const vote    = myVote(p);
   const score   = p.score || 0;
   const scoreClass = score >= 70 ? 'high' : score >= 50 ? 'med' : '';
   const xUrl = p.x_profile || (p.username ? `https://x.com/${p.username}` : '#');
+
+  const projectName = extractProjectName(p.memo);
+  const showProject = projectName && projectName.toLowerCase() !== (p.name || '').toLowerCase();
 
   const sectors  = (p.sectors || []).map(s => `<span class="tag">${esc(s)}</span>`).join('');
   const stageLabel = p.stage_early_growth === 'Early' ? 'Early Stage'
@@ -811,6 +825,7 @@ function cardHTML(p) {
       <div class="card-name"><a href="${esc(xUrl)}" target="_blank" rel="noopener">${esc(p.name || p.username)}</a></div>
       <div class="card-sub">
         <span class="card-username">@${esc(p.username)}</span>
+        ${showProject ? `<span class="card-project-name">${esc(projectName)}</span>` : ''}
       </div>
     </div>
   </div>
