@@ -29,7 +29,7 @@ from shared.notion import (
 
 PARTNERS = {"Jocy", "Momir"}
 
-_PROJECT_NAMES_PATH = Path(__file__).parent.parent / "data" / "project_names.json"
+_PROJECT_NAMES_PATH = Path(__file__).parent / "project_names.json"
 _PROJECT_NAMES: dict[str, str] = (
     json.loads(_PROJECT_NAMES_PATH.read_text())
     if _PROJECT_NAMES_PATH.exists() else {}

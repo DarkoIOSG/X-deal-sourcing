@@ -24,7 +24,7 @@ load_dotenv(override=True)
 import anthropic
 from shared.notion import query_voting_projects
 
-CACHE_PATH = Path(__file__).parent.parent / "data" / "project_names.json"
+CACHE_PATH = Path(__file__).parent.parent / "webapp" / "project_names.json"
 MODEL = "claude-haiku-4-5-20251001"
 
 PROMPT = """\
