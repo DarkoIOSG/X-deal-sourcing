@@ -414,6 +414,17 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 .assign-item.assigned .check { opacity: 1; }
 .assign-item img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 
+/* ── Funding info ── */
+.funding-info {
+  font-size: 12px; color: var(--text2); line-height: 1.7;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 9px 12px;
+}
+.funding-info .funding-row { display: flex; gap: 5px; }
+.funding-info .funding-label { color: var(--text3); white-space: nowrap; }
+.funding-info .funding-value { color: var(--text); font-weight: 500; }
+.funding-info .funding-investors { color: var(--text2); font-style: italic; }
+
 /* ── Assigned-to chips on card ── */
 .assigned-to-row { display: flex; flex-wrap: wrap; gap: 5px; }
 .assigned-chip {
@@ -742,6 +753,18 @@ function render() {
   });
 }
 
+function fundingHTML(p) {
+  const amount = p.last_round_amount;
+  const date   = p.last_round_date;
+  const investors = p.investors;
+  if (!amount && !date && !investors) return '';
+  let rows = '';
+  if (amount) rows += `<div class="funding-row"><span class="funding-label">Last round:</span><span class="funding-value">${esc(amount)}</span></div>`;
+  if (date)   rows += `<div class="funding-row"><span class="funding-label">Date:</span><span class="funding-value">${esc(date)}</span></div>`;
+  if (investors) rows += `<div class="funding-row"><span class="funding-label">Investors:</span><span class="funding-investors">${esc(investors)}</span></div>`;
+  return `<div class="funding-info">${rows}</div>`;
+}
+
 function cardHTML(p) {
   const vote    = myVote(p);
   const score   = p.score || 0;
@@ -793,6 +816,7 @@ function cardHTML(p) {
   </div>
   ${p.one_liner ? `<div class="card-one-liner">${esc(p.one_liner)}</div>` : ''}
   ${(stageBadge || sectors) ? `<div class="tags">${stageBadge}${sectors}</div>` : ''}
+  ${fundingHTML(p)}
   ${assignedChips}
   ${p.memo ? `
   <button class="memo-toggle" data-id="${esc(p.notion_id)}">
