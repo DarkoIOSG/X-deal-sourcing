@@ -58,22 +58,28 @@ fields = {
     PROP_STAGE_EARLY_GROWTH:  stage,
 }
 
-# Populate fundraising fields only if not already set
-fields[PROP_RAISED] = <True/False>          # always set — True if any round exists
+# ── Fundraising fields ────────────────────────────────────────────────────
+# PROP_RAISED: always set — True if ANY round exists, False if fully bootstrapped/not disclosed
+fields[PROP_RAISED] = <True/False>
+
+# For each field below: if Notion is already populated, the guard skips it.
+# If Notion is empty AND you found the data → replace the placeholder with real value.
+# If Notion is empty AND data is not publicly disclosed → delete that line entirely.
 if not existing["last_round_date"]:
-    pass  # fields[PROP_LAST_ROUND_DATE] = "YYYY-MM-DD"   # omit if not disclosed
+    fields[PROP_LAST_ROUND_DATE] = "YYYY-MM-DD"          # e.g. "2024-03-15"
+
 if not existing["last_round_amount"]:
-    pass  # fields[PROP_LAST_ROUND_AMOUNT] = "$Xm Seed/Series A"
+    fields[PROP_LAST_ROUND_AMOUNT] = "$Xm Seed/Series A" # e.g. "$4.5M Seed"
+
 if not existing["last_round_valuation"]:
-    pass  # fields[PROP_LAST_ROUND_VALUATION] = "$XM"
+    fields[PROP_LAST_ROUND_VALUATION] = "$XM"            # e.g. "$30M"
+
 if not existing["investors"]:
-    pass  # fields[PROP_INVESTORS] = "Lead, Co-investor"
+    fields[PROP_INVESTORS] = "Lead, Co-investor"          # e.g. "Paradigm, a16z crypto"
 
 update_row(notion_id, fields)
 print("Done")
 ```
-
-Replace each `pass  #` line with the actual assignment when data is available; remove the line entirely when data is not disclosed.
 
 **6.** Print `[ok] @handle → Deep_Dived` or `[error] @handle: reason`.
 
