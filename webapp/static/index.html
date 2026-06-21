@@ -770,57 +770,13 @@ function fundingHTML(p) {
   return `<div class="funding-info">${rows}</div>`;
 }
 
-const _STOP_WORDS = new Set(['This','The','A','An','It','In','Our','Their','Its','There','He','She','We','They','I']);
-
-function extractProjectName(memo, oneLiner, displayName) {
-  const dn = (displayName || '').toLowerCase();
-
-  // 1. ## [ProjectName](url) header — works when the account IS the project
-  if (memo) {
-    const m = memo.match(/^##\s+\[([^\]]+)\]/m);
-    if (m) {
-      const name = m[1].trim();
-      if (name.toLowerCase() !== dn) return name;
-    }
-  }
-
-  // 2. One-liner field: "ProjectName — description" (em-dash separates name from pitch)
-  if (oneLiner) {
-    const m = oneLiner.match(/^([^—–\n]{2,40}?)\s*[—–]/);
-    if (m) {
-      const candidate = m[1].trim();
-      if (candidate && /^[A-Z0-9]/.test(candidate) && candidate.toLowerCase() !== dn)
-        return candidate;
-    }
-  }
-
-  if (memo) {
-    // 3. Value proposition: "ProjectName is a ..." at the start of the bullet
-    const vpMatch = memo.match(/\*\*[Vv]alue proposition:\*\*\s+([A-Z][a-zA-Z0-9.]+(?:[- ][A-Z][a-zA-Z0-9.]+)*)\s+is\s+/);
-    if (vpMatch) {
-      const candidate = vpMatch[1].trim();
-      if (!_STOP_WORDS.has(candidate.split(/\s+/)[0]) && candidate.toLowerCase() !== dn)
-        return candidate;
-    }
-
-    // 4. "building ProjectName" — catches "This founder is building Nominal.dev"
-    const buildMatch = memo.match(/\bbuilding\s+([A-Z][a-zA-Z0-9.-]+)/);
-    if (buildMatch) {
-      const candidate = buildMatch[1].replace(/[,.]$/, '').trim();
-      if (candidate.toLowerCase() !== dn) return candidate;
-    }
-  }
-
-  return null;
-}
-
 function cardHTML(p) {
   const vote    = myVote(p);
   const score   = p.score || 0;
   const scoreClass = score >= 70 ? 'high' : score >= 50 ? 'med' : '';
   const xUrl = p.x_profile || (p.username ? `https://x.com/${p.username}` : '#');
 
-  const projectName = extractProjectName(p.memo, p.one_liner, p.name);
+  const projectName = p.project_name || null;
   const showProject = projectName && projectName.toLowerCase() !== (p.name || '').toLowerCase();
 
   const sectors  = (p.sectors || []).map(s => `<span class="tag">${esc(s)}</span>`).join('');

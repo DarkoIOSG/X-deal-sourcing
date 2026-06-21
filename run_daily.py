@@ -15,6 +15,7 @@ SCRIPTS = [
     ["python3", "scripts/search_github.py", "--push"],
     ["python3", "scripts/search_google_news.py", "--push"],
     ["python3", "scripts/search_linkedin.py", "--push"],
+    ["python3", "scripts/extract_project_names.py"],
 ]
 
 

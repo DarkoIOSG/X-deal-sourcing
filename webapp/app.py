@@ -1,7 +1,9 @@
 import os
 import sys
+import json
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -26,6 +28,12 @@ from shared.notion import (
 )
 
 PARTNERS = {"Jocy", "Momir"}
+
+_PROJECT_NAMES_PATH = Path(__file__).parent.parent / "data" / "project_names.json"
+_PROJECT_NAMES: dict[str, str] = (
+    json.loads(_PROJECT_NAMES_PATH.read_text())
+    if _PROJECT_NAMES_PATH.exists() else {}
+)
 
 app = FastAPI(title="IOSG Deal Radar")
 app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")), name="static")
@@ -151,6 +159,12 @@ def get_me(request: Request):
     return {"voter": _get_voter(request)}
 
 
+def _enrich(projects: list[dict]) -> list[dict]:
+    for p in projects:
+        p["project_name"] = _PROJECT_NAMES.get(p["notion_id"])
+    return projects
+
+
 @app.get("/api/projects")
 def get_projects(request: Request):
     projects = query_voting_projects()
@@ -161,7 +175,7 @@ def get_projects(request: Request):
                 flag_reviewed(p["notion_id"])
             except Exception:
                 pass
-    return projects
+    return _enrich(projects)
 
 
 class VoteRequest(BaseModel):
@@ -217,7 +231,7 @@ def get_assigned(request: Request):
     voter_name = _get_voter(request)
     if not voter_name:
         raise HTTPException(status_code=401, detail="not authenticated")
-    return query_assigned_projects(voter_name)
+    return _enrich(query_assigned_projects(voter_name))
 
 
 def _should_auto_review(project: dict) -> bool:
