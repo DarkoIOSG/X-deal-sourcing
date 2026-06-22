@@ -491,12 +491,22 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
   main { padding: 14px 12px 60px; }
 
   /* Single-column grid */
-  .grid { grid-template-columns: 1fr; gap: 10px; }
+  .grid { grid-template-columns: 1fr; gap: 10px; min-width: 0; }
 
-  /* Cards */
-  .card { padding: 16px 14px; gap: 10px; }
+  /* Cards — min-width:0 prevents grid blowout from wide memo content */
+  .card { padding: 16px 14px; gap: 10px; min-width: 0; overflow: hidden; }
   .card-name { font-size: 16px; padding-right: 58px; }
   .card-one-liner { font-size: 13px; }
+
+  /* Memo — break long words/URLs, constrain width */
+  .memo-body {
+    font-size: 13px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  .memo-body ul { padding-left: 14px; }
+  .memo-body p, .memo-body li { max-width: 100%; }
 
   /* Vote buttons — bigger tap targets */
   .vote-section { gap: 8px; flex-wrap: wrap; }
