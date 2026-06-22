@@ -68,6 +68,7 @@ def main():
         cache = json.loads(CACHE_PATH.read_text())
 
     updated = 0
+    skipped = 0
     for p in projects:
         if not p.get("memo"):
             continue
@@ -75,17 +76,19 @@ def main():
         notion_id = p["notion_id"]
         display_name = p["name"] or p["username"]
 
+        if notion_id in cache and not args.dry_run:
+            print(f"@{p['username']:20s}  {display_name!r:35s}  →  {cache[notion_id]!r}  (cached)")
+            skipped += 1
+            continue
+
         project_name = extract(client, display_name, p["memo"])
         print(f"@{p['username']:20s}  {display_name!r:35s}  →  {project_name!r}")
 
         if project_name and project_name.lower() != display_name.lower():
             cache[notion_id] = project_name
             updated += 1
-        else:
-            # Remove stale entry if it no longer differs
-            cache.pop(notion_id, None)
 
-    print(f"\n{updated} entries differ from display name.")
+    print(f"\n{updated} new entries extracted, {skipped} already cached.")
 
     if not args.dry_run:
         CACHE_PATH.parent.mkdir(exist_ok=True)
