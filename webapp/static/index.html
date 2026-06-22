@@ -438,6 +438,83 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
   background: var(--accent-bg); color: var(--accent-text); border: 1px solid var(--accent-border);
 }
 .assigned-chip img { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; }
+
+/* ══ Mobile (≤ 640 px) ══════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* Header: two-row layout — logo+voter on top, tabs below */
+  header {
+    padding: 0 12px;
+    flex-wrap: wrap;
+  }
+  .logo {
+    flex: 1;
+    border-right: none;
+    padding: 10px 0;
+    font-size: 14px;
+    margin-right: 0;
+  }
+  .voter-label { display: none; }
+  .voter-wrap { padding: 8px 0; gap: 6px; }
+  .voter-name-btn { padding: 6px 10px; font-size: 13px; }
+
+  /* Tabs: push to second row, horizontally scrollable */
+  .tabs {
+    order: 10;
+    width: 100%;
+    border-top: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    height: 40px;
+    padding: 0 14px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  /* Subfilters: single scrollable row */
+  .subfilters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 10px 12px 0;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .subfilters::-webkit-scrollbar { display: none; }
+  .filter-divider { flex-shrink: 0; }
+  .sub-btn { flex-shrink: 0; }
+
+  /* Main area */
+  main { padding: 14px 12px 60px; }
+
+  /* Single-column grid */
+  .grid { grid-template-columns: 1fr; gap: 10px; }
+
+  /* Cards */
+  .card { padding: 16px 14px; gap: 10px; }
+  .card-name { font-size: 16px; padding-right: 58px; }
+  .card-one-liner { font-size: 13px; }
+
+  /* Vote buttons — bigger tap targets */
+  .vote-section { gap: 8px; flex-wrap: wrap; }
+  .vote-btn { padding: 11px 16px; font-size: 14px; min-height: 44px; }
+  .voter-avatars { max-width: 140px; }
+
+  /* Score / reviewed badges */
+  .score-badge { padding: 4px 9px; font-size: 13px; top: 16px; right: 14px; }
+  .card.reviewed .score-badge { top: 36px; }
+  .reviewed-badge { top: 12px; right: 12px; }
+
+  /* Auth modal */
+  .voter-modal {
+    min-width: unset;
+    width: calc(100vw - 32px);
+    padding: 32px 20px;
+  }
+}
 </style>
 </head>
 <body>
