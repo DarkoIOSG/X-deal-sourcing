@@ -8,23 +8,62 @@
 # Director level and above for large companies (Coinbase, Binance).
 #
 # ── Coinbase ──────────────────────────────────────────────────────────────────
-
+@brian_armstrong       # Co-founder & CEO
+@iampaulgrewal         # Chief Legal Officer
+@emiliemc              # President & COO
+@yugacohler            # Head of Eng @CoinbaseDev
+@J0se                  # VP Customer Experience
+@rwitoff               # Head of Platform
+@edkeonl               # Product Director
+@AlexOnchain           # Head of Social (also ex-Binance)
 # ── Uniswap Labs ──────────────────────────────────────────────────────────────
+@haydenzadams          # Founder
+# Ex-Uniswap — already departed
+@ammori                # Ex-CLO, now co-founder @nativemarkets
+@Mclader               # Ex-President & COO, now @nativemarkets
+@tarikbell             # Ex-eng, now Head of Eng @morpho
 
 # ── dYdX ─────────────────────────────────────────────────────────────────────
+@dgogel                # COO
 
 # ── Aave / MakerDAO ───────────────────────────────────────────────────────────
+@StaniKulechov         # Founder & CEO @Aave
 
 # ── Solana Labs ───────────────────────────────────────────────────────────────
+@toly                  # Co-Founder
+@nickducoff            # Head of Institutional Growth @Solana Foundation
 
 # ── Ethereum Foundation ───────────────────────────────────────────────────────
+@tkstanczak            # Ex-Co-Executive Director — already building robotics @hf0
+@cburgdorf             # Engineer
 
 # ── Optimism / Arbitrum / StarkWare / Matter Labs ─────────────────────────────
+@jinglejamOP           # CEO OP Labs & Co-founder Optimism
+@kelvinfichter         # Co-founder / Tech Lead Security @OPLabsPBC
+@sgoldfed              # Co-founder @Offchain Labs / @arbitrum
+@0xjesstech            # DevRel Engineer @Arbitrum
+@EliBenSasson          # CEO @StarkWare, co-founder Zcash
+@AbdelStark            # Head of Applied AI @StarkWareLtd
+@jessiexiao_eth        # Ecosystem Ventures Principal @Starknet, prev co-founder @matchain_io
+@omarespejel           # AI @starknetfndn, ex @starkwareltd
 
 # ── Chainlink / LayerZero / EigenLayer ───────────────────────────────────────
+@ChrisBarrett          # Senior Director Comms @Chainlink
+@AndrewMcMarkets       # Head of Institutional @Chainlink
+@0x_Arjun              # Head of Crypto @LayerZero
+@IreneWu27             # Ex-Head of Strategy @LayerZero, now angel investor
 
 # ── Binance / OKX / Bybit / Kraken ───────────────────────────────────────────
+@_RichardTeng          # Co-CEO @Binance
+@star_okx              # Founder & CEO @OKX
+@5AM5E                 # Global Director Product Marketing @OKX
+@follis_               # Head of Voice @KrakenPro + founder @Chroma_Trading
 
 # ── Circle / Paxos / Fireblocks ───────────────────────────────────────────────
+@jerallaire            # Co-founder & CEO @Circle
+@RonakDaya             # Ex-Head of Product @Paxos
 
 # ── a16z Crypto / Paradigm alumni ────────────────────────────────────────────
+@FEhrsam               # Co-founder @Paradigm — already co-founding @Nudge
+@nlevine19             # Partner @a16z crypto
+@RSSH273               # Law & policy, prev @Paradigm
