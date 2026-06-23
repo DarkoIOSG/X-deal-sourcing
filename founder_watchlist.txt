@@ -18,13 +18,22 @@
 @AlexOnchain           # Head of Social (also ex-Binance)
 # ── Uniswap Labs ──────────────────────────────────────────────────────────────
 @haydenzadams          # Founder
-# Ex-Uniswap — already departed
-@ammori                # Ex-CLO, now co-founder @nativemarkets
-@Mclader               # Ex-President & COO, now @nativemarkets
-@tarikbell             # Ex-eng, now Head of Eng @morpho
+@chiragnarang23
+@gretzke
+@MarkToda
+@saintniko
+@medhakothari
+@dom_garaventa
+@plondon514
+@dannythedawger
+@chaserchapman
+
 
 # ── dYdX ─────────────────────────────────────────────────────────────────────
 @dgogel                # COO
+@AntonioMJuliano
+@epic_edge_
+
 
 # ── Aave / MakerDAO ───────────────────────────────────────────────────────────
 @StaniKulechov         # Founder & CEO @Aave
