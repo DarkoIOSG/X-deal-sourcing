@@ -11,7 +11,7 @@ An end-to-end deal-sourcing system for IOSG Ventures. Discovers new crypto proje
 Run all five scripts every day. Each script pushes new projects to Notion with `Status = New`.
 
 ```bash
-python3 search_test.py                   # X keyword search (launch announcements)
+python3 scripts/search_x.py               # X keyword search (launch announcements)
 python3 scripts/search_linkedin.py --push  # LinkedIn funding announcements via Exa
 python3 scripts/search_github.py --push    # GitHub new crypto repos
 python3 scripts/search_google_news.py --push  # Google News RSS funding signals
@@ -21,8 +21,8 @@ python3 scripts/fetch_defillama_raises.py  # DeFi Llama recent raises
 ### Weekly — Scoring
 
 ```bash
-python3 run.py        # Smart money watchlist: who is the smart money newly following?
-python3 score_run.py  # Phase 1 hard filter + Phase 2 AI scoring on all Status = New
+python3 run_watchlist.py  # Smart money watchlist: who is the smart money newly following?
+python3 run_score.py      # Phase 1 hard filter + Phase 2 AI scoring on all Status = New
 ```
 
 ### After Scoring — Deep Dive
@@ -44,19 +44,19 @@ Never use Anthropic API — web_search and web_fetch only.
 
 ```
 Daily discovery
-    ├── search_test.py           ← X keyword search
-    ├── search_linkedin.py       ← LinkedIn posts via Exa
-    ├── search_github.py         ← GitHub new repos
-    ├── search_google_news.py    ← Google News RSS
-    └── fetch_defillama_raises.py ← DeFi Llama raises
+    ├── scripts/search_x.py               ← X keyword search
+    ├── scripts/search_linkedin.py        ← LinkedIn posts via Exa
+    ├── scripts/search_github.py          ← GitHub new repos
+    ├── scripts/search_google_news.py     ← Google News RSS
+    └── scripts/fetch_defillama_raises.py ← DeFi Llama raises
 
 Weekly
-    └── run.py                   ← Smart money watchlist (who is smart money following?)
+    └── run_watchlist.py         ← Smart money watchlist (who is smart money following?)
 
 All sources → Notion (Status = New)
     │
     ▼
-score_run.py
+run_score.py
     ├── Phase 1: hard filter  →  Status = Filtered
     └── Phase 2: AI scoring   →  Status = Scored
 
@@ -68,7 +68,7 @@ Manual deep dive (Claude, web only)
 
 ## Discovery Scripts
 
-### `search_test.py` — X Keyword Search
+### `scripts/search_x.py` — X Keyword Search
 
 Searches X for recent tweets matching launch/announcement keywords in the crypto space.
 
@@ -78,7 +78,7 @@ Searches X for recent tweets matching launch/announcement keywords in the crypto
 - Pushes new projects to Notion with `Status = New`
 
 ```bash
-python3 search_test.py
+python3 scripts/search_x.py
 ```
 
 ---
@@ -138,7 +138,7 @@ python3 scripts/fetch_defillama_raises.py
 
 ---
 
-### `run.py` — Watchlist Tracking (Weekly)
+### `run_watchlist.py` — Watchlist Tracking (Weekly)
 
 Monitors who the smart money on X is newly following. Surfaces projects followed by multiple respected accounts in the last 7 days.
 
@@ -151,12 +151,12 @@ Monitors who the smart money on X is newly following. Surfaces projects followed
 7. Syncs to Notion with `Status = New` + sends Telegram digest
 
 ```bash
-python3 run.py
+python3 run_watchlist.py
 ```
 
 ---
 
-## Scoring — `score_run.py`
+## Scoring — `run_score.py`
 
 Pulls all `Status = New` rows from Notion and runs two filters.
 
@@ -191,7 +191,7 @@ Scores each surviving project against `shared/prompts/thesis_doc.md`:
 All scored projects → `Status = Scored`.
 
 ```bash
-python3 score_run.py
+python3 run_score.py
 ```
 
 ---
@@ -289,9 +289,10 @@ TELEGRAM_CHAT_ID=your_telegram_group_chat_id
 ## Project Structure
 
 ```
-run.py                            # Weekly: watchlist tracking
-search_test.py                    # Daily: X keyword search
-score_run.py                      # Weekly: Phase 1 filter + Phase 2 AI scoring
+run_daily.py                      # Daily: runs all discovery scripts in sequence
+run_watchlist.py                  # Weekly: smart money watchlist tracking
+run_score.py                      # Weekly: Phase 1 filter + Phase 2 AI scoring
+run_deep_dive.py                  # On-demand: deep-dive agent on top candidates
 
 config.py                         # API keys and constants
 state.py                          # SQLite dedup (state.db)
@@ -310,10 +311,13 @@ pipeline/
   score.py                        # Phase 2 Claude Haiku scoring
 
 scripts/
+  search_x.py                     # Daily: X keyword search (launch/announce signals)
   search_linkedin.py              # Daily: LinkedIn announcements via Exa
   search_github.py                # Daily: GitHub new crypto repos
   search_google_news.py           # Daily: Google News RSS funding signals
   fetch_defillama_raises.py       # Daily: DeFi Llama raises
+  enrich_funding.py               # Weekly: populate funding fields (DeFiLlama + Surf)
+  monitor_founders.py             # On-demand: stealth founder departure signals
   search_thematic.py              # Thematic deep search (Exa + YC + X)
   build_ic_index.py               # Build IC retrieval vector index
   test_exa.py                     # Debug Exa results for a company name

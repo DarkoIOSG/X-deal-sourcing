@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 
 SCRIPTS = [
-    ["python3", "search_test.py"],
+    ["python3", "scripts/search_x.py"],
     ["python3", "scripts/fetch_defillama_raises.py"],
     ["python3", "scripts/search_github.py", "--push"],
     ["python3", "scripts/search_google_news.py", "--push"],
