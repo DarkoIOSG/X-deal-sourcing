@@ -27,7 +27,7 @@ python3 run_score.py      # Phase 1 hard filter + Phase 2 AI scoring on all Stat
 
 ### After Scoring — Deep Dive
 
-1. Open Notion, filter for `Status = Scored, Recommendation = deep_dive`
+1. Open Notion, filter for `Status = Scored`
 2. For each project, run this prompt in Claude (web_search + web_fetch only):
 
 ```
@@ -198,7 +198,7 @@ python3 run_score.py
 
 ## Deep Dive (Manual)
 
-After scoring, filter Notion for `Status = Scored, Recommendation = deep_dive`. For each project, run this prompt in Claude:
+After scoring, filter Notion for `Status = Scored`. For each project, run this prompt in Claude:
 
 ```
 Deep-dive @{handle}. Follow shared/prompts/deep_dive_manual.md for steps
@@ -251,7 +251,6 @@ All projects flow through one Notion database:
 - [Anthropic](https://console.anthropic.com) API key
 - [Exa](https://exa.ai) API key
 - Notion integration token + database ID
-- Telegram bot token + chat ID (optional)
 
 ### Installation
 
