@@ -23,7 +23,10 @@ MIN_WATCHERS = 1  # minimum watchlist members that must follow an account to sur
 TEAM_MEMBERS = ["Darko", "Jocy", "Momir", "Yiping", "Frank", "Mario"]
 ASSIGNEES    = ["Yiping", "Frank", "Mario"]  # members partners can assign projects to
 
-TEAM_EMAILS: dict[str, str] = {f"{n.lower()}@iosg.vc": n for n in TEAM_MEMBERS}
+_EMAIL_OVERRIDES = {"Mario": "mariochow@iosg.vc"}
+TEAM_EMAILS: dict[str, str] = {
+    _EMAIL_OVERRIDES.get(n, f"{n.lower()}@iosg.vc"): n for n in TEAM_MEMBERS
+}
 
 # Voting webapp — auth (Google OAuth + signed session cookie)
 SECRET_KEY          = os.getenv("SECRET_KEY", "dev-secret-change-in-production")
