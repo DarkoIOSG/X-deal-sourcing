@@ -10,6 +10,10 @@ Run:
 
 import sys
 import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import anthropic
 from config import SORSA_API_KEY, ANTHROPIC_API_KEY
 from state import init_db, get_known_ids, add_account
